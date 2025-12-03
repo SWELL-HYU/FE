@@ -1,0 +1,6 @@
+{
+  "version": 3,
+  "sources": [],
+  "sections": [
+    {"offset": {"line": 18, "column": 0}, "map": {"version":3,"sources":["file:///Users/hun/Projects/swell/FE/app/page.tsx"],"sourcesContent":["export default function Home() {\n  return (\n    <div className=\"flex min-h-screen items-center justify-center bg-blue-100\">\n      <h1 className=\"text-4xl font-bold text-blue-600\">\n        Swell에 오신 것을 환영합니다!\n      </h1>\n    </div>\n  );\n}"],"names":[],"mappings":";;;;;;AAAe,SAAS;IACtB,qBACE,8OAAC;QAAI,WAAU;kBACb,cAAA,8OAAC;YAAG,WAAU;sBAAmC;;;;;;;;;;;AAKvD"}}]
+}

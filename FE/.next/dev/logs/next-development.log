@@ -1,0 +1,587 @@
+[00:00:00.690] Server  LOG      ✓ Ready in 517ms
+[00:00:27.155] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:00:30.661] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:40.814] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:09:40.956] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:18:39.162] Server  LOG      ✓ Compiled in 45ms
+[00:26:06.845] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:06.953] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:07.079] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:07.166] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:07.441] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:07.522] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:26:07.615] Server  LOG      ✓ Compiled in 38ms
+[00:26:07.622] Browser ERROR   uncaughtError: Error: The default export is not a React Component in "/start/page"
+[00:30:22.547] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:30:27.717] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:30:27.844] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:32:41.532] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password\\\": \\\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:33:41.901] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:33:42.025] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:33:59.337] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:35:53.956] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:35:54.588] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:35:54.786] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:35:54.968] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:36:46.200] Browser ERROR   로그인 에러: {"code":"ERR_NETWORK","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"tasdfdfasafsd@naver.com\",\"password\":\"password123\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Network Error","name":"AxiosError","stack":"AxiosError: Network Error\n    at XMLHttpRequest.handleError (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7559:25)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)"}
+[00:38:42.577] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:38:42.717] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:43:41.391] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:43:45.533] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:43:45.646] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:44:39.385] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MTk3OX0.m4c0xBbkERPkhlhiJqmjyR36ZXpaYiZGac2O74C4zBE","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)","status":400}
+[00:52:39.389] Server  LOG      ✓ Compiled in 0ms
+[00:52:39.435] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:53:45.809] Browser ERROR   ./app/layout.tsx:39:22
+Parsing ecmascript source code failed
+  37 |     </html>
+  38 |   );
+> 39 | }subsets: ["korean"],
+     |                      ^
+
+Expression expected
+[00:55:34.967] Server  LOG      ✓ Compiled in 185ms
+[00:55:35.131] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:56:33.966] Server  LOG      ✓ Compiled in 259ms
+[00:58:23.597] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:23.840] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:23.966] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:24.075] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:24.171] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:24.260] Server  ERROR    ⨯ Error: The default export is not a React Component in "/start/page"
+[00:58:24.355] Browser ERROR   uncaughtError: Error: The default export is not a React Component in "/start/page"
+[00:58:30.175] Server  LOG      ✓ Compiled in 57ms
+[00:58:35.719] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:58:35.828] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:59:17.240] Server  LOG      ✓ Compiled in 37ms
+[00:59:21.861] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:59:21.964] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:59:23.038] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:59:23.145] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:59:23.551] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:59:23.660] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[00:59:24.072] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[00:59:24.182] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[01:00:11.684] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"ㅇㅇ\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MzM0MH0.xuBqQ_XuR_WU9VEJFfo3xNeXbgUIzcdF3H9EwiFtyrc","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)","status":400}
+[01:00:16.920] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:00:17.034] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[01:01:35.312] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:01:37.477] Server  LOG      ✓ Compiled in 85ms
+[01:01:37.536] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:01:42.368] Server  LOG      ✓ Compiled in 64ms
+[01:01:42.426] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:01:50.372] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[01:04:01.428] Server  LOG      ✓ Compiled in 62ms
+[01:05:19.193] Server  LOG      ✓ Compiled in 29ms
+[01:05:56.917] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MzM0MH0.xuBqQ_XuR_WU9VEJFfo3xNeXbgUIzcdF3H9EwiFtyrc","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js?id=%255Bproject%255D%252Fapp%252Fstart%252Fpage.tsx+%255Bapp-client%255D+%2528ecmascript%2529:56:30)","status":400}
+[01:09:12.757] Server  LOG      ✓ Compiled in 60ms
+[01:09:13.807] Browser ERROR   ./app/start/page.tsx:245:14
+Parsing ecmascript source code failed
+  243 |                 )}
+  244 |               </div>
+> 245 |             )}
+      |              ^
+  246 |           </div>
+  247 |
+  248 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:09:16.806] Browser ERROR   ./app/start/page.tsx:246:14
+Parsing ecmascript source code failed
+  244 |                 )}
+  245 |               </div>
+> 246 |             )}
+      |              ^
+  247 |           </div>
+  248 |
+  249 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:09:20.807] Browser ERROR   ./app/start/page.tsx:207:14
+Parsing ecmascript source code failed
+  205 |                 )}
+  206 |               </div>
+> 207 |             )}
+      |              ^
+  208 |           </div>
+  209 |
+  210 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:09:22.808] Browser ERROR   ./app/start/page.tsx:326:14
+Parsing ecmascript source code failed
+  324 |                 )}
+  325 |               </div>
+> 326 |             )}
+      |              ^
+  327 |           </div>
+  328 |
+  329 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:10:00.808] Browser ERROR   ./app/start/page.tsx:207:14
+Parsing ecmascript source code failed
+  205 |                 )}
+  206 |               </div>
+> 207 |             )}
+      |              ^
+  208 |           </div>
+  209 |
+  210 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:10:02.807] Browser ERROR   ./app/start/page.tsx:246:14
+Parsing ecmascript source code failed
+  244 |                 )}
+  245 |               </div>
+> 246 |             )}
+      |              ^
+  247 |           </div>
+  248 |
+  249 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:10:06.807] Browser ERROR   ./app/start/page.tsx:245:14
+Parsing ecmascript source code failed
+  243 |                 )}
+  244 |               </div>
+> 245 |             )}
+      |              ^
+  246 |           </div>
+  247 |
+  248 |           {/* 프로모 카드 */}
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:11:16.454] Server  LOG      ✓ Compiled in 34ms
+[01:11:16.807] Browser ERROR   ./app/start/page.tsx:217:1
+Parsing ecmascript source code failed
+  215 |     </div>
+  216 |   );
+> 217 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:11:19.808] Browser ERROR   ./app/start/page.tsx:336:1
+Parsing ecmascript source code failed
+  334 |     </div>
+  335 |   );
+> 336 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:11:33.808] Browser ERROR   ./app/start/page.tsx:336:1
+Parsing ecmascript source code failed
+  334 |     </div>
+  335 |   );
+> 336 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:11:36.807] Browser ERROR   ./app/start/page.tsx:336:1
+Parsing ecmascript source code failed
+  334 |     </div>
+  335 |   );
+> 336 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:10.290] Server  LOG      ✓ Compiled in 26ms
+[01:12:10.807] Browser ERROR   ./app/start/page.tsx:335:1
+Parsing ecmascript source code failed
+  333 |     </div>
+  334 |   );
+> 335 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:18.451] Server  LOG      ✓ Compiled in 16ms
+[01:12:18.807] Browser ERROR   ./app/start/page.tsx:258:11
+Parsing ecmascript source code failed
+  256 |               </div>
+  257 |             )
+> 258 |           {/* 프로모 카드 */}
+      |           ^
+  259 |           <div 
+  260 |             className="rounded-[10px] flex-1 min-h-[200px] flex items-center justify-center"
+  261 |             style={{ backgroundColor: "rgba(255, 244, 234, 0.6)" }}
+
+Expected '</', got '{'
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:21.807] Browser ERROR   ./app/start/page.tsx:258:11
+Parsing ecmascript source code failed
+  256 |               </div>
+  257 |             
+> 258 |           {/* 프로모 카드 */}
+      |           ^
+  259 |           <div 
+  260 |             className="rounded-[10px] flex-1 min-h-[200px] flex items-center justify-center"
+  261 |             style={{ backgroundColor: "rgba(255, 244, 234, 0.6)" }}
+
+Expected '</', got '{'
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:27.788] Server  LOG      ✓ Compiled in 25ms
+[01:12:28.807] Browser ERROR   ./app/start/page.tsx:335:1
+Parsing ecmascript source code failed
+  333 |     </div>
+  334 |   );
+> 335 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:31.807] Browser ERROR   ./app/start/page.tsx:336:1
+Parsing ecmascript source code failed
+  334 |     </div>
+  335 |   );
+> 336 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:12:34.807] Browser ERROR   ./app/start/page.tsx:217:1
+Parsing ecmascript source code failed
+  215 |     </div>
+  216 |   );
+> 217 | }
+      | ^
+
+Unexpected token. Did you mean `{'}'}` or `&rbrace;`?
+
+Import traces:
+  Client Component Browser:
+    ./app/start/page.tsx [Client Component Browser]
+    ./app/start/page.tsx [Server Component]
+
+  Client Component SSR:
+    ./app/start/page.tsx [Client Component SSR]
+    ./app/start/page.tsx [Server Component]
+[01:13:30.426] Server  LOG      ✓ Compiled in 45ms
+[01:13:40.851] Server  LOG      ✓ Compiled in 57ms
+[01:13:53.896] Server  LOG      ✓ Compiled in 34ms
+[01:13:56.491] Server  LOG      ✓ Compiled in 25ms
+[01:14:06.354] Server  LOG      ✓ Compiled in 24ms
+[01:15:50.011] Server  LOG      ✓ Compiled in 84ms
+[01:16:23.866] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MzM0MH0.xuBqQ_XuR_WU9VEJFfo3xNeXbgUIzcdF3H9EwiFtyrc","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js?id=%255Bproject%255D%252Fapp%252Fstart%252Fpage.tsx+%255Bapp-client%255D+%2528ecmascript%2529:56:30)","status":400}
+[01:17:02.725] Server  LOG      ✓ Compiled in 45ms
+[01:17:08.906] Server  LOG      ✓ Compiled in 30ms
+[01:18:52.851] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MzM0MH0.xuBqQ_XuR_WU9VEJFfo3xNeXbgUIzcdF3H9EwiFtyrc","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js?id=%255Bproject%255D%252Fapp%252Fstart%252Fpage.tsx+%255Bapp-client%255D+%2528ecmascript%2529:56:30)","status":400}
+[01:18:54.402] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[01:18:54.513] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[01:18:55.895] Browser ERROR   로그인 에러: {"code":"ERR_BAD_REQUEST","config":{"adapter":["xhr","http","fetch"],"allowAbsoluteUrls":true,"baseURL":"http://localhost:8000/api","data":"{\"email\":\"\",\"password\":\"\"}","env":{},"headers":{"Accept":"application/json, text/plain, */*","Authorization":"Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbWFpbCI6InRhc2RmZGZhc2Fmc2RAbmF2ZXIuY29tIiwic3ViIjoiNyIsImV4cCI6MTc2NDg0MzM0MH0.xuBqQ_XuR_WU9VEJFfo3xNeXbgUIzcdF3H9EwiFtyrc","Content-Type":"application/json"},"maxBodyLength":-1,"maxContentLength":-1,"method":"post","timeout":0,"transformRequest":[null],"transformResponse":[null],"transitional":{"clarifyTimeoutError":false,"forcedJSONParsing":true,"silentJSONParsing":true},"url":"/auth/login","xsrfCookieName":"XSRF-TOKEN","xsrfHeaderName":"X-XSRF-TOKEN"},"message":"Request failed with status code 400","name":"AxiosError","stack":"AxiosError: Request failed with status code 400\n    at settle (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:6998:16)\n    at XMLHttpRequest.onloadend (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:7513:174)\n    at Axios.request (http://localhost:3000/_next/static/chunks/node_modules_e95eb438._.js:8317:49)\n    at async login (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:71:22)\n    at async handleLogin (http://localhost:3000/_next/static/chunks/_0edeebc1._.js:168:30)","status":400}
+[01:26:15.804] Server  LOG      ✓ Compiled in 61ms
+[01:26:29.120] Server  LOG      ✓ Compiled in 23ms
+[01:26:38.108] Server  LOG      ✓ Compiled in 17ms
+[01:26:49.429] Server  LOG      ✓ Compiled in 36ms
+[01:26:56.668] Server  LOG      ✓ Compiled in 31ms
+[01:27:32.149] Server  LOG      ✓ Compiled in 41ms
+[01:37:19.615] Server  LOG      ✓ Compiled in 69ms
+[01:38:45.538] Server  LOG      ✓ Compiled in 54ms
+[01:39:04.022] Server  LOG      ✓ Compiled in 26ms
+[01:39:09.873] Server  LOG      ✓ Compiled in 30ms
+[01:39:17.875] Server  LOG      ✓ Compiled in 25ms
+[01:43:34.544] Server  LOG      ✓ Compiled in 78ms
+[01:43:34.807] Browser WARN    Image with src "/images/finger.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:43:34.807] Browser WARN    Image with src "/images/heart.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[01:45:53.456] Server  LOG      ✓ Compiled in 32ms
+[01:47:01.905] Server  LOG      ✓ Compiled in 32ms
+[01:47:13.233] Server  LOG      ✓ Compiled in 23ms
+[01:47:26.889] Server  LOG      ✓ Compiled in 24ms
+[01:47:34.300] Server  LOG      ✓ Compiled in 24ms
+[01:47:39.946] Server  LOG      ✓ Compiled in 22ms
+[01:47:46.015] Server  LOG      ✓ Compiled in 29ms
+[01:50:11.072] Server  LOG      ✓ Compiled in 35ms
+[01:52:05.244] Server  LOG      ✓ Compiled in 33ms
+[01:52:12.927] Server  LOG      ✓ Compiled in 25ms
+[01:52:17.455] Server  LOG      ✓ Compiled in 20ms
+[01:52:31.567] Server  LOG      ✓ Compiled in 26ms
+[01:53:07.288] Server  LOG      ✓ Compiled in 42ms
+[01:53:16.902] Server  LOG      ✓ Compiled in 29ms
+[01:53:23.481] Server  LOG      ✓ Compiled in 32ms
+[01:53:28.046] Server  LOG      ✓ Compiled in 18ms
+[01:54:12.899] Server  LOG      ✓ Compiled in 28ms
+[01:54:17.928] Server  LOG      ✓ Compiled in 60ms
+[01:54:53.341] Server  LOG      ✓ Compiled in 31ms
+[01:57:54.338] Server  LOG      ✓ Compiled in 37ms
+[01:57:56.882] Server  LOG      ✓ Compiled in 26ms
+[01:58:24.485] Server  LOG      ✓ Compiled in 26ms
+[01:58:29.402] Server  LOG      ✓ Compiled in 28ms
+[01:58:36.902] Server  LOG      ✓ Compiled in 35ms
+[01:58:40.886] Server  LOG      ✓ Compiled in 26ms
+[01:58:50.899] Server  LOG      ✓ Compiled in 39ms
+[01:59:34.416] Server  LOG      ✓ Compiled in 61ms
+[01:59:40.073] Server  LOG      ✓ Compiled in 23ms
+[01:59:43.007] Server  LOG      ✓ Compiled in 22ms
+[01:59:46.883] Server  LOG      ✓ Compiled in 22ms
+[01:59:50.882] Server  LOG      ✓ Compiled in 25ms
+[02:00:07.865] Server  LOG      ✓ Compiled in 18ms
+[02:00:34.310] Server  LOG      ✓ Compiled in 25ms
+[02:00:37.151] Server  LOG      ✓ Compiled in 27ms
+[02:00:42.857] Server  LOG      ✓ Compiled in 65ms
+[02:00:50.986] Server  LOG      ✓ Compiled in 27ms
+[02:00:52.372] Server  LOG      ✓ Compiled in 20ms
+[02:00:59.898] Server  LOG      ✓ Compiled in 26ms
+[02:05:34.338] Server  LOG      ✓ Compiled in 58ms
+[02:05:46.011] Server  LOG      ✓ Compiled in 19ms
+[02:05:46.807] Browser WARN    Image with src "/images/mirror.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:08:30.207] Server  LOG      ✓ Compiled in 28ms
+[02:09:39.403] Server  LOG      ✓ Compiled in 38ms
+[02:09:56.089] Server  LOG      ✓ Compiled in 22ms
+[02:10:04.756] Server  LOG      ✓ Compiled in 27ms
+[02:10:06.883] Server  LOG      ✓ Compiled in 26ms
+[02:10:20.885] Server  LOG      ✓ Compiled in 24ms
+[02:10:44.893] Server  LOG      ✓ Compiled in 29ms
+[02:11:01.817] Server  LOG      ✓ Compiled in 24ms
+[02:11:05.477] Server  LOG      ✓ Compiled in 23ms
+[02:11:07.877] Server  LOG      ✓ Compiled in 26ms
+[02:11:18.347] Server  LOG      ✓ Compiled in 26ms
+[02:11:20.097] Server  LOG      ✓ Compiled in 23ms
+[02:11:24.120] Server  LOG      ✓ Compiled in 20ms
+[02:11:32.879] Server  LOG      ✓ Compiled in 21ms
+[02:12:07.891] Server  LOG      ✓ Compiled in 28ms
+[02:13:24.333] Server  LOG      ✓ Compiled in 44ms
+[02:13:41.855] Server  LOG      ✓ Compiled in 30ms
+[02:13:52.889] Server  LOG      ✓ Compiled in 27ms
+[02:13:57.873] Server  LOG      ✓ Compiled in 27ms
+[02:15:40.533] Server  LOG      ✓ Compiled in 30ms
+[02:18:00.382] Server  LOG      ✓ Compiled in 44ms
+[02:19:09.790] Server  LOG      ✓ Compiled in 42ms
+[02:19:15.055] Server  LOG      ✓ Compiled in 19ms
+[02:19:23.905] Server  LOG      ✓ Compiled in 35ms
+[02:21:31.833] Server  LOG      ✓ Compiled in 0ms
+[02:21:31.940] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:21:36.388] Server  LOG      ✓ Compiled in 123ms
+[02:21:36.491] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:07.832] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:08.748] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:09.671] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:10.251] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:10.672] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:11.008] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:11.435] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:11.698] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:11.991] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:30.520] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:23:30.625] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:24:04.930] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.062] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.147] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.239] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.341] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.409] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.490] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.563] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.690] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.780] Server  ERROR    ⨯ ReferenceError: Abyssinica_SIL is not defined
+[02:24:05.855] Browser ERROR   uncaughtError: ReferenceError: Abyssinica_SIL is not defined
+[02:24:20.318] Server  LOG      ✓ Compiled in 55ms
+[02:24:24.086] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:24:24.195] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:26:17.828] Server  LOG      ✓ Compiled in 25ms
+[02:26:26.258] Server  LOG      ✓ Compiled in 25ms
+[02:26:49.787] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:26:49.895] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:26:52.139] Browser WARN    Image with src "/images/heart.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:26:52.139] Browser WARN    Image with src "/images/finger.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:26:52.596] Browser WARN    Image with src "/images/mirror.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:27:04.190] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:27:04.310] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:28:14.943] Browser WARN    Image with src "/images/finger.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:28:14.943] Browser WARN    Image with src "/images/heart.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:28:15.703] Browser WARN    Image with src "/images/mirror.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:29:29.198] Server  LOG      ✓ Compiled in 44ms
+[02:32:59.949] Server  LOG      ✓ Compiled in 68ms
+[02:33:48.932] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:33:51.493] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:34:16.860] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:34:16.986] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:34:46.590] Browser WARN    Image with src "/images/finger.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:34:46.590] Browser WARN    Image with src "/images/heart.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:34:47.341] Browser WARN    Image with src "/images/mirror.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:35:34.957] Server  LOG      ✓ Compiled in 54ms
+[02:35:46.894] Server  LOG      ✓ Compiled in 34ms
+[02:36:02.885] Server  LOG      ✓ Compiled in 25ms
+[02:36:28.682] Server  LOG      ✓ Compiled in 25ms
+[02:36:31.889] Server  LOG      ✓ Compiled in 29ms
+[02:36:38.568] Server  LOG      ✓ Compiled in 28ms
+[02:37:22.139] Server  LOG      ✓ Compiled in 28ms
+[02:37:23.889] Server  LOG      ✓ Compiled in 30ms
+[02:37:28.886] Server  LOG      ✓ Compiled in 27ms
+[02:37:45.129] Server  LOG      ✓ Compiled in 63ms
+[02:37:47.895] Server  LOG      ✓ Compiled in 33ms
+[02:38:07.081] Server  LOG      ✓ Compiled in 28ms
+[02:38:08.275] Server  LOG      ✓ Compiled in 24ms
+[02:38:11.737] Server  LOG      ✓ Compiled in 23ms
+[02:38:13.979] Server  LOG      ✓ Compiled in 21ms
+[02:38:15.745] Server  LOG      ✓ Compiled in 29ms
+[02:38:19.068] Server  LOG      ✓ Compiled in 25ms
+[02:38:21.193] Server  LOG      ✓ Compiled in 55ms
+[02:39:32.381] Server  LOG      ✓ Compiled in 29ms
+[02:47:15.322] Browser INFO    %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold
+[02:47:15.411] Browser WARN    Image with src "/images/swell_wo_bg.png" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading
+[02:47:19.172] Browser WARN    Image with src "/images/finger.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:47:19.172] Browser WARN    Image with src "/images/heart.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:47:21.425] Browser WARN    Image with src "/images/mirror.png" has either width or height modified, but not the other. If you use CSS to change the size of your image, also include the styles 'width: "auto"' or 'height: "auto"' to maintain the aspect ratio.
+[02:47:38.857] Server  LOG      ✓ Compiled in 38ms
+[02:47:40.192] Server  LOG      ✓ Compiled in 24ms
+[02:47:47.034] Server  LOG      ✓ Compiled in 24ms
+[02:47:49.883] Server  LOG      ✓ Compiled in 24ms
+[02:48:00.386] Server  LOG      ✓ Compiled in 27ms
