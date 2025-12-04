@@ -2,24 +2,44 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { getRecommendations, addFavorite, removeFavorite } from "@/lib/outfits";
+import { saveClosetItem } from "@/lib/closet";
+import { logout } from "@/lib/auth";
+import type { Outfit, Season, Style } from "@/types/api";
 
 export default function MainPage() {
   const router = useRouter();
-  const { user, loading } = useAuth(true); 
   
+  // 상태 관리
+  const [outfits, setOutfits] = useState<Outfit[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const [isTransitioning, setIsTransitioning] = useState(false);
   const [showDropdown, setShowDropdown] = useState(false);
-  const [likedOutfits, setLikedOutfits] = useState<number[]>([]);
+  const [userName, setUserName] = useState("User");
   const [savedItems, setSavedItems] = useState<number[]>([]);
-  const [selectedSeasons, setSelectedSeasons] = useState<string[]>([]);
-  const [selectedStyles, setSelectedStyles] = useState<string[]>([]);
+  
+  // 필터 상태
+  const [selectedSeason, setSelectedSeason] = useState<Season | undefined>(undefined);
+  const [selectedStyle, setSelectedStyle] = useState<Style | undefined>(undefined);
+  
   const dropdownRef = useRef<HTMLDivElement>(null);
 
-  // 필터 옵션
-  const seasons = ["봄", "여름", "가을", "겨울"];
-  const styles = ["캐주얼", "미니멀", "스트릿", "스포티"];
+  // 필터 옵션 (백엔드 API 기반)
+  const seasons: { label: string; value: Season }[] = [
+    { label: "봄", value: "spring" },
+    { label: "여름", value: "summer" },
+    { label: "가을", value: "fall" },
+    { label: "겨울", value: "winter" },
+  ];
+
+  const styles: { label: string; value: Style }[] = [
+    { label: "캐주얼", value: "casual" },
+    { label: "미니멀", value: "minimal" },
+    { label: "스트릿", value: "street" },
+    { label: "스포티", value: "sporty" },
+  ];
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -32,97 +52,49 @@ export default function MainPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 데이터
-  const allOutfits = [
-    {
-      id: 1,
-      style: "캐주얼",
-      season: "봄",
-      description: "편안한 봄 캐주얼 룩",
-      llmMessage: "화사한 봄날에 딱 맞는 코디예요! 린넨 셔츠가 시원한 느낌을 주고, 치노 팬츠가 깔끔한 인상을 줘요. 🌸",
-      items: [
-        { id: 101, name: "오버핏 린넨 셔츠", brand: "ZARA", category: "상의", price: 59000 },
-        { id: 102, name: "와이드 치노 팬츠", brand: "UNIQLO", category: "하의", price: 39000 },
-        { id: 103, name: "캔버스 스니커즈", brand: "CONVERSE", category: "신발", price: 75000 },
-      ],
-    },
-    {
-      id: 2,
-      style: "미니멀",
-      season: "여름",
-      description: "시원한 여름 미니멀 룩",
-      llmMessage: "더운 여름에도 스타일을 포기하지 않는 미니멀 룩이에요. 쿨맥스 소재가 땀 흡수를 도와줘요! ☀️",
-      items: [
-        { id: 201, name: "쿨맥스 반팔 티", brand: "COS", category: "상의", price: 45000 },
-        { id: 202, name: "라이트 데님 쇼츠", brand: "LEVIS", category: "하의", price: 89000 },
-        { id: 203, name: "레더 샌들", brand: "BIRKENSTOCK", category: "신발", price: 120000 },
-      ],
-    },
-    {
-      id: 3,
-      style: "스트릿",
-      season: "가을",
-      description: "트렌디한 가을 스트릿 룩",
-      llmMessage: "가을 감성 가득한 스트릿 룩! 후디와 카고 팬츠 조합이 트렌디하면서도 편안해요. 🍂",
-      items: [
-        { id: 301, name: "그래픽 후디", brand: "STUSSY", category: "상의", price: 149000 },
-        { id: 302, name: "카고 조거 팬츠", brand: "NIKE", category: "하의", price: 99000 },
-        { id: 303, name: "에어포스 1", brand: "NIKE", category: "신발", price: 139000 },
-      ],
-    },
-    {
-      id: 4,
-      style: "스포티",
-      season: "여름",
-      description: "활동적인 여름 스포티 룩",
-      llmMessage: "운동할 때도, 일상에서도 활용 가능한 스포티 룩이에요! 통기성 좋은 소재로 시원해요. 💪",
-      items: [
-        { id: 401, name: "드라이핏 티셔츠", brand: "NIKE", category: "상의", price: 45000 },
-        { id: 402, name: "트레이닝 쇼츠", brand: "ADIDAS", category: "하의", price: 55000 },
-        { id: 403, name: "러닝화", brand: "NEW BALANCE", category: "신발", price: 129000 },
-      ],
-    },
-    {
-      id: 5,
-      style: "미니멀",
-      season: "겨울",
-      description: "따뜻한 겨울 미니멀 룩",
-      llmMessage: "추운 겨울에도 깔끔한 미니멀 스타일! 코트와 니트의 조합이 세련돼요. ❄️",
-      items: [
-        { id: 501, name: "울 블렌드 코트", brand: "COS", category: "아우터", price: 290000 },
-        { id: 502, name: "캐시미어 니트", brand: "UNIQLO", category: "상의", price: 79000 },
-        { id: 503, name: "슬랙스", brand: "ZARA", category: "하의", price: 59000 },
-      ],
-    },
-  ];
-
-  // 필터링 로직
-  const filteredOutfits = allOutfits.filter((outfit) => {
-    const seasonMatch = selectedSeasons.length === 0 || selectedSeasons.includes(outfit.season);
-    const styleMatch = selectedStyles.length === 0 || selectedStyles.includes(outfit.style);
-    return seasonMatch && styleMatch;
-  });
-
-  const currentOutfit = filteredOutfits[currentIndex];
-  const isLiked = currentOutfit ? likedOutfits.includes(currentOutfit.id) : false;
-
-  // 필터 변경 시 인덱스 리셋
+  // 사용자 정보 가져오기
   useEffect(() => {
-    setCurrentIndex(0);
-  }, [selectedSeasons, selectedStyles]);
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      router.push("/start");
+      return;
+    }
 
-  // 필터 토글 함수
-  const toggleSeason = (season: string) => {
-    setSelectedSeasons(prev => 
-      prev.includes(season) ? prev.filter(s => s !== season) : [...prev, season]
-    );
+    const storedName = sessionStorage.getItem("userName");
+    if (storedName) {
+      setUserName(storedName);
+    }
+  }, [router]);
+
+  // 코디 데이터 가져오기
+  const fetchOutfits = async () => {
+    setLoading(true);
+    setError("");
+    
+    try {
+      const response = await getRecommendations({
+        page: 1,
+        limit: 20,
+        season: selectedSeason,
+        style: selectedStyle,
+      });
+      
+      setOutfits(response.data.outfits);
+      setCurrentIndex(0);
+    } catch (err: any) {
+      console.error("코디 로딩 실패:", err);
+      setError("코디를 불러오는데 실패했습니다");
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleStyle = (style: string) => {
-    setSelectedStyles(prev => 
-      prev.includes(style) ? prev.filter(s => s !== style) : [...prev, style]
-    );
-  };
+  // 초기 로딩 + 필터 변경 시 재로딩
+  useEffect(() => {
+    fetchOutfits();
+  }, [selectedSeason, selectedStyle]);
+
+  const currentOutfit = outfits[currentIndex];
 
   // 네비게이션 함수
   const handlePrev = () => {
@@ -136,7 +108,7 @@ export default function MainPage() {
   };
 
   const handleNext = () => {
-    if (currentIndex < filteredOutfits.length - 1 && !isTransitioning) {
+    if (currentIndex < outfits.length - 1 && !isTransitioning) {
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1);
@@ -145,53 +117,131 @@ export default function MainPage() {
     }
   };
 
-  const handleToggleLike = () => {
+  // 좋아요 토글
+  const handleToggleLike = async () => {
     if (!currentOutfit) return;
-    if (isLiked) {
-      setLikedOutfits(likedOutfits.filter((id) => id !== currentOutfit.id));
-    } else {
-      setLikedOutfits([...likedOutfits, currentOutfit.id]);
+    
+    try {
+      if (currentOutfit.isFavorite) {
+        await removeFavorite(currentOutfit.id);
+        setOutfits(outfits.map(outfit => 
+          outfit.id === currentOutfit.id 
+            ? { ...outfit, isFavorite: false }
+            : outfit
+        ));
+      } else {
+        await addFavorite(currentOutfit.id);
+        setOutfits(outfits.map(outfit => 
+          outfit.id === currentOutfit.id 
+            ? { ...outfit, isFavorite: true }
+            : outfit
+        ));
+      }
+    } catch (err: any) {
+      console.error("좋아요 실패:", err);
+      alert("좋아요 처리에 실패했습니다");
     }
   };
 
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    router.push("/start");
+  // 로그아웃
+  const handleLogout = async () => {
+    try {
+      await logout();
+      router.push("/start");
+    } catch (err) {
+      router.push("/start");
+    }
   };
 
-  // 로딩 상태 처리
-  if (loading) {
+  // 계절 필터 토글
+  const toggleSeason = (season: Season) => {
+    if (selectedSeason === season) {
+      setSelectedSeason(undefined);
+    } else {
+      setSelectedSeason(season);
+    }
+  };
+
+  // 스타일 필터 토글
+  const toggleStyle = (style: Style) => {
+    if (selectedStyle === style) {
+      setSelectedStyle(undefined);
+    } else {
+      setSelectedStyle(style);
+    }
+  };
+
+  // 옷장에 아이템 저장
+  const handleSaveToCloset = async (itemId: number) => {
+    if (savedItems.includes(itemId)) {
+      alert("이미 옷장에 저장된 아이템입니다");
+      return;
+    }
+    
+    try {
+      await saveClosetItem(itemId);
+      setSavedItems([...savedItems, itemId]);
+      alert("✅ 옷장에 저장되었습니다!");
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
+      alert(errorMessage);
+    }
+  };
+
+  // 로딩 상태
+  if (loading && outfits.length === 0) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500 animate-pulse">Loading Swell...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">코디를 불러오는 중...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 에러 상태
+  if (error && outfits.length === 0) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
+        <div className="text-center">
+          <p className="text-red-500 mb-4">{error}</p>
+          <button
+            onClick={fetchOutfits}
+            className="px-6 py-2 bg-[#5697B0] text-white rounded-lg hover:opacity-80"
+          >
+            다시 시도
+          </button>
+        </div>
       </div>
     );
   }
 
   return (
-    // 배경 그라디언트 적용
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
       
       {/* 상단 네비게이션 */}
       <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
-        <h1 className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer" onClick={() => window.location.reload()}>
-          <span className="font-[Snippet]">Swell</span>
+        <h1 
+          className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer font-snippet" 
+          onClick={() => window.location.reload()}
+        >
+          Swell
         </h1>
         
-        {/* 프로필 드롭다운*/}
+        {/* 프로필 드롭다운 */}
         <div className="relative" ref={dropdownRef}>
           <button
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
           >
-            {/* 유저 이름 표시 (Auth 연동) */}
-            <span className="font-medium">{user?.name || "User"}</span>
+            <span className="font-medium">{userName}</span>
             <span className={`transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}>▼</span>
           </button>
           
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-50 animate-fadeIn">
-               <button
+              <button
                 onClick={() => {
                   router.push("/favorites");
                   setShowDropdown(false);
@@ -220,7 +270,7 @@ export default function MainPage() {
         {/* 네비게이션 화살표 */}
         <button
           onClick={handlePrev}
-          disabled={currentIndex === 0 || isTransitioning || filteredOutfits.length === 0}
+          disabled={currentIndex === 0 || isTransitioning || outfits.length === 0}
           className="absolute left-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-gray-500/80 backdrop-blur-sm shadow-lg flex items-center justify-center text-white text-xl disabled:opacity-30 hover:bg-black transition-all hover:scale-105"
         >
           ←
@@ -228,7 +278,7 @@ export default function MainPage() {
 
         <button
           onClick={handleNext}
-          disabled={currentIndex === filteredOutfits.length - 1 || isTransitioning || filteredOutfits.length === 0}
+          disabled={currentIndex === outfits.length - 1 || isTransitioning || outfits.length === 0}
           className="absolute right-6 top-1/2 -translate-y-1/2 z-20 w-12 h-12 rounded-full bg-gray-500/80 backdrop-blur-sm shadow-lg flex items-center justify-center text-white text-xl disabled:opacity-30 hover:bg-black transition-all hover:scale-105"
         >
           →
@@ -240,36 +290,52 @@ export default function MainPage() {
             isTransitioning ? "opacity-0" : "opacity-100"
           }`}
         >
-          {/* 왼쪽: 코디 이미지 (5:6 비율) */}
+          {/* 왼쪽: 코디 이미지 */}
           <div className="w-full md:w-[45%] flex items-center justify-center">
-            {filteredOutfits.length > 0 && currentOutfit ? (
+            {outfits.length > 0 && currentOutfit ? (
               <div className="relative w-full aspect-[3/4] max-h-[calc(100vh-200px)]">
                 
                 {/* 코디 이미지 카드 */}
                 <div className="bg-white rounded-[16px] shadow-xl overflow-hidden h-full border border-gray-100">
                   <div className="h-full bg-gray-100 flex items-center justify-center relative group">
-                    {/* 실제 이미지가 들어갈 곳 (현재는 placeholder) */}
-                    <div className="text-center text-gray-400">
-                      <p className="text-8xl mb-4 group-hover:scale-110 transition-transform duration-500">👕</p>
-                      <p className="text-lg font-medium text-gray-500">Swell Styling</p>
-                      <p className="mt-2 text-sm bg-white px-3 py-1 rounded-full inline-block shadow-sm">
-                        {currentOutfit.style} / {currentOutfit.season}
-                      </p>
-                    </div>
+                    {currentOutfit.imageUrl ? (
+                      <img
+                        src={currentOutfit.imageUrl}
+                        alt={currentOutfit.description || "코디 이미지"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="text-center text-gray-400">
+                        <p className="text-8xl mb-4 group-hover:scale-110 transition-transform duration-500">👕</p>
+                        <p className="text-lg font-medium text-gray-500">Swell Styling</p>
+                        <p className="mt-2 text-sm bg-white px-3 py-1 rounded-full inline-block shadow-sm">
+                          {currentOutfit.style} / {currentOutfit.season}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* 좋아요 버튼 (우측 상단 플로팅) */}
+                {/* 좋아요 버튼 */}
                 <button
                   onClick={handleToggleLike}
                   className={`absolute top-4 right-4 w-14 h-14 rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-all duration-300 border border-gray-100 ${
-                    isLiked ? "bg-pink-50" : "bg-white"
+                    currentOutfit.isFavorite ? "bg-pink-50" : "bg-white"
                   }`}
                 >
-                  <span className={`text-3xl transition-transform ${isLiked ? "scale-110" : "scale-100"}`}>
-                    {isLiked ? "❤️" : "🤍"}
+                  <span className={`text-3xl transition-transform ${currentOutfit.isFavorite ? "scale-110" : "scale-100"}`}>
+                    {currentOutfit.isFavorite ? "❤️" : "🤍"}
                   </span>
                 </button>
+
+                {/* LLM 메시지 */}
+                {currentOutfit.llmMessage && (
+                  <div className="absolute bottom-4 left-4 right-4 bg-white/95 backdrop-blur-sm rounded-lg p-4 shadow-lg border border-gray-100">
+                    <p className="text-sm text-gray-700 leading-relaxed">
+                      💬 {currentOutfit.llmMessage}
+                    </p>
+                  </div>
+                )}
               </div>
             ) : (
               <div className="text-center text-gray-400">
@@ -280,49 +346,68 @@ export default function MainPage() {
             )}
           </div>
 
-          {/* 오른쪽: 필터 + 상품 정보 (5:6 비율) */}
+          {/* 오른쪽: 필터 + 상품 정보 */}
           <div className="hidden md:flex flex-col overflow-hidden" style={{ width: '600px' }}>
-            {/* 필터 영역 (상단 고정) */}
+            {/* 필터 영역 */}
             <div className="mb-6 flex-shrink-0">
+              {/* 계절 필터 */}
               <div className="mb-4">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Season</h3>
                 <div className="flex flex-wrap gap-2">
                   {seasons.map((season) => (
                     <button
-                      key={season}
-                      onClick={() => toggleSeason(season)}
+                      key={season.value}
+                      onClick={() => toggleSeason(season.value)}
                       className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        selectedSeasons.includes(season)
+                        selectedSeason === season.value
                           ? "bg-[#5697B0]/20 text-[#2c5261] ring-1 ring-[#5697B0]"
                           : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      {season}
+                      {season.label}
                     </button>
                   ))}
+                  {selectedSeason && (
+                    <button
+                      onClick={() => setSelectedSeason(undefined)}
+                      className="px-4 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    >
+                      전체 보기
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {/* 스타일 필터 */}
               <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Style</h3>
                 <div className="flex flex-wrap gap-2">
                   {styles.map((style) => (
                     <button
-                      key={style}
-                      onClick={() => toggleStyle(style)}
+                      key={style.value}
+                      onClick={() => toggleStyle(style.value)}
                       className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all ${
-                        selectedStyles.includes(style)
+                        selectedStyle === style.value
                           ? "bg-[#5697B0]/20 text-[#2c5261] ring-1 ring-[#5697B0]"
                           : "bg-white text-gray-500 border border-gray-200 hover:bg-gray-50"
                       }`}
                     >
-                      {style}
+                      {style.label}
                     </button>
                   ))}
+                  {selectedStyle && (
+                    <button
+                      onClick={() => setSelectedStyle(undefined)}
+                      className="px-4 py-1.5 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    >
+                      전체 보기
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
 
-            {/* 상품 목록 (스크롤 영역) */}
+            {/* 상품 목록 */}
             {currentOutfit && (
               <div className="flex-1 flex flex-col min-h-0">
                 <h2 className="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2">
@@ -339,39 +424,62 @@ export default function MainPage() {
                       className="bg-white rounded-lg shadow-sm border border-gray-100 p-2.5 flex gap-3 hover:shadow-md transition-shadow group"
                     >
                       {/* 상품 이미지 */}
-                      <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-gray-100 transition-colors">
-                        <span className="text-xl">👔</span>
+                      <div className="w-16 h-16 bg-gray-50 rounded-lg flex items-center justify-center flex-shrink-0 group-hover:bg-gray-100 transition-colors overflow-hidden">
+                        {item.imageUrl ? (
+                          <img
+                            src={item.imageUrl}
+                            alt={item.name}
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <span className="text-xl">👔</span>
+                        )}
                       </div>
 
                       {/* 상품 정보 */}
                       <div className="flex-1 flex flex-col justify-between min-w-0">
                         <div>
-                          <p className="text-[10px] text-gray-400 font-bold tracking-wide">{item.brand}</p>
-                          <p className="font-medium text-gray-800 text-xs truncate leading-tight">
-                            {item.name}
+                          <p className="text-[10px] text-gray-400 font-bold tracking-wide">
+                            {item.brand || "BRAND"}
+                          </p>
+                          {/* ✅ 상품명 클릭 시 구매 링크 이동 */}
+                          {item.purchaseUrl ? (
+                            <a
+                              href={item.purchaseUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="font-medium text-gray-800 text-xs truncate leading-tight hover:text-[#5697B0] hover:underline cursor-pointer"
+                            >
+                              {item.name}
+                            </a>
+                          ) : (
+                            <p className="font-medium text-gray-800 text-xs truncate leading-tight">
+                              {item.name}
+                            </p>
+                          )}
+                          <p className="text-[10px] text-gray-400 mt-0.5">
+                            {item.category}
                           </p>
                         </div>
 
                         <div className="flex items-center justify-between mt-1">
-                          <p className="text-[#5697B0] font-bold text-xs">
-                            {item.price.toLocaleString()}원
-                          </p>
+                          {item.price ? (
+                            <p className="text-[#5697B0] font-bold text-xs">
+                              {item.price.toLocaleString()}원
+                            </p>
+                          ) : (
+                            <p className="text-gray-400 text-xs">가격 문의</p>
+                          )}
+                          {/* ✅ Add Closet 버튼 */}
                           <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              if (savedItems.includes(item.id)) {
-                                setSavedItems(savedItems.filter(id => id !== item.id));
-                              } else {
-                                setSavedItems([...savedItems, item.id]);
-                              }
-                            }}
+                            onClick={() => handleSaveToCloset(item.id)}
                             className={`px-2 py-1 text-[9px] rounded-md transition-all font-medium ${
                               savedItems.includes(item.id)
                                 ? "bg-gray-800 text-white"
                                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                             }`}
                           >
-                            {savedItems.includes(item.id) ? "Saved ✓" : "+ Closet"}
+                            {savedItems.includes(item.id) ? "Saved ✓" : "Add Closet"}
                           </button>
                         </div>
                       </div>
@@ -384,13 +492,20 @@ export default function MainPage() {
         </div>
       </div>
 
-      {/* 옷장 플로팅 버튼 (네비게이션 연동) */}
+      {/* 옷장 플로팅 버튼 */}
       <button
         onClick={() => router.push("/closet")}
         className="fixed bottom-10 right-12 w-18 h-18 bg-[#FFF4EA] text-[#5697B0] border-4 border-white rounded-full shadow-2xl flex items-center justify-center text-5xl hover:bg-[#ffeedb] hover:scale-105 transition-all z-30 group"
       >
         <span className="group-hover:rotate-12 transition-transform duration-300">👜</span>
       </button>
+
+      {/* 진행 표시 */}
+      {outfits.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-white/90 backdrop-blur-sm px-4 py-2 rounded-full shadow-lg text-sm text-gray-600">
+          {currentIndex + 1} / {outfits.length}
+        </div>
+      )}
     </div>
   );
 }

@@ -1,35 +1,56 @@
 // lib/closet.ts
-// 옷장 관리 관련 API 함수들
+// 옷장 관리 관련 API 함수들 (실제 백엔드 구현 기반)
 
 import api from "./api";
 import type {
   ApiSuccessResponse,
-  ClosetItem,
   Pagination,
-  Season,
 } from "@/types/api";
 
 /**
  * ============================================
- * 5.1 내 옷 목록 조회
+ * 옷장 아이템 타입 (백엔드 스키마 기반)
+ * ============================================
+ */
+export interface ClosetItem {
+  id: number;
+  category: string;
+  brand: string | null;
+  name: string;
+  price: number | null;
+  imageUrl: string | null;
+  purchaseUrl: string | null;
+  savedAt: string; // ISO 8601
+}
+
+export interface CategoryCounts {
+  top: number;
+  bottom: number;
+  outer: number;
+}
+
+/**
+ * ============================================
+ * 옷장 아이템 목록 조회
  * GET /api/closet
  * ============================================
  */
 export const getClosetItems = async (params?: {
   page?: number;
   limit?: number;
-  category?: string;
+  category?: "all" | "top" | "bottom" | "outer";
 }) => {
   const response = await api.get<
     ApiSuccessResponse<{
       items: ClosetItem[];
       pagination: Pagination;
+      categoryCounts: CategoryCounts;
     }>
   >("/closet", {
     params: {
       page: params?.page || 1,
       limit: params?.limit || 20,
-      category: params?.category,
+      category: params?.category || "all",
     },
   });
   return response.data;
@@ -37,47 +58,24 @@ export const getClosetItems = async (params?: {
 
 /**
  * ============================================
- * 5.2 옷 추가
- * POST /api/closet
+ * 옷장에 아이템 저장
+ * POST /api/closet/items
  * ============================================
  */
-export const addClosetItem = async (data: { image: File; season: Season }) => {
-  const formData = new FormData();
-  formData.append("image", data.image);
-  formData.append("season", data.season);
-
+export const saveClosetItem = async (itemId: number) => {
   const response = await api.post<
     ApiSuccessResponse<{
       message: string;
-      item: ClosetItem;
+      savedAt: string;
     }>
-  >("/closet", formData, {
-    headers: {
-      "Content-Type": "multipart/form-data",
-    },
-  });
+  >("/closet/items", { itemId });
   return response.data;
 };
 
 /**
  * ============================================
- * 5.3 특정 옷 조회
- * GET /api/closet/{itemId}
- * ============================================
- */
-export const getClosetItem = async (itemId: number) => {
-  const response = await api.get<
-    ApiSuccessResponse<{
-      item: ClosetItem;
-    }>
-  >(`/closet/${itemId}`);
-  return response.data;
-};
-
-/**
- * ============================================
- * 5.4 옷 삭제
- * DELETE /api/closet/{itemId}
+ * 옷장에서 아이템 삭제
+ * DELETE /api/closet/items/{itemId}
  * ============================================
  */
 export const deleteClosetItem = async (itemId: number) => {
@@ -86,6 +84,6 @@ export const deleteClosetItem = async (itemId: number) => {
       message: string;
       deletedAt: string;
     }>
-  >(`/closet/${itemId}`);
+  >(`/closet/items/${itemId}`);
   return response.data;
 };
