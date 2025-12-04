@@ -139,7 +139,7 @@ export default function StartPage() {
                   setName("");
                   setGender("");
                 }}
-                className="text-black text-[14px] leading-[20px] hover:opacity-70 transition-opacity font-abyssinica"
+                className="text-black text-[14px] leading-[20px] hover:opacity-70 transition-opacity"
               >
                 {isLogin ? "sign up" : "login"}
               </button>
@@ -161,7 +161,7 @@ export default function StartPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                   />
                 </div>
                 <div className="flex gap-2">
@@ -172,7 +172,7 @@ export default function StartPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                      className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                     />
                   </div>
                   <button
@@ -189,7 +189,7 @@ export default function StartPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-center text-black mt-4 text-[14px] leading-[20px] font-abyssinica">
+                <p className="text-center text-black mt-4 text-[14px] leading-[20px]">
                   Find your swell!
                 </p>
               </div>
@@ -209,7 +209,7 @@ export default function StartPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                   />
                 </div>
                 <div className="border border-black rounded-[4px] h-[43.2px] flex items-center px-4">
@@ -219,7 +219,7 @@ export default function StartPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                   />
                 </div>
                 <div className="border border-black rounded-[4px] h-[43.2px] flex items-center px-4">
@@ -229,7 +229,7 @@ export default function StartPage() {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                   />
                 </div>
                 <div className="border border-black rounded-[4px] h-[43.2px] flex items-center px-4">
@@ -239,7 +239,7 @@ export default function StartPage() {
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282] font-abyssinica"
+                    className="w-full bg-transparent outline-none text-[14px] placeholder:text-[#6a7282]"
                   />
                 </div>
                 <div className="border border-black rounded-[4px] h-[43.2px] flex items-center px-4">
@@ -252,7 +252,7 @@ export default function StartPage() {
                         onChange={() => setGender("male")}
                         className="w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-[13px] font-abyssinica">Male</span>
+                      <span className="text-[13px]">Male</span>
                     </label>
                     <label className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
                       <input
@@ -262,7 +262,7 @@ export default function StartPage() {
                         onChange={() => setGender("female")}
                         className="w-4 h-4 cursor-pointer"
                       />
-                      <span className="text-[13px] font-abyssinica">Female</span>
+                      <span className="text-[13px]">Female</span>
                     </label>
                   </div>
                 </div>
@@ -281,7 +281,7 @@ export default function StartPage() {
                     )}
                   </button>
                 </div>
-                <p className="text-center text-black text-[14px] leading-[20px] font-abyssinica">
+                <p className="text-center text-black text-[14px] leading-[20px]">
                   join your swell!
                 </p>
               </div>
@@ -295,7 +295,7 @@ export default function StartPage() {
             }`}
             style={{ backgroundColor: "rgba(255, 244, 234, 0.6)" }}
           >
-            <p className="text-gray-400 text-sm font-abyssinica">Promo Area</p>
+            <p className="text-gray-400 text-sm">Promo Area</p>
           </div>
         </div>
 
@@ -305,7 +305,7 @@ export default function StartPage() {
             className="rounded-[10px] h-full p-8 flex flex-col"
             style={{ backgroundColor: "rgba(255, 244, 234, 0.9)" }}
           >
-            <p className="text-right text-[#6a7282] text-[12px] leading-[16px] mb-4 font-abyssinica">
+            <p className="text-right text-[#6a7282] text-[12px] leading-[16px] mb-4">
               Page {currentPage + 1} of {guidePages.length}
             </p>
             
@@ -319,7 +319,7 @@ export default function StartPage() {
                 <>
                   {/* 제목 영역 - 높이 고정 */}
                   <div className="h-[36px] mb-10 flex items-center">
-                    <h2 className="text-[20px] leading-[28px] text-[#1e2939] font-abyssinica">
+                    <h2 className="text-[20px] leading-[28px] text-[#1e2939]">
                       Find your Swell
                     </h2>
                   </div>
@@ -351,7 +351,7 @@ export default function StartPage() {
                 <>
                   {/* 제목 영역 - 높이 고정 */}
                   <div className="h-[36px] mb-10 flex items-center">
-                    <h2 className="text-[20px] leading-[28px] text-[#1e2939] font-abyssinica">
+                    <h2 className="text-[20px] leading-[28px] text-[#1e2939]">
                       Join your Swell
                     </h2>
                   </div>
@@ -381,7 +381,7 @@ export default function StartPage() {
                 <>
                   {/* 제목 영역 - 높이 고정 */}
                   <div className="h-[36px] mb-10 flex items-center">
-                    <h2 className="text-[20px] leading-[28px] text-[#1e2939] font-abyssinica">
+                    <h2 className="text-[20px] leading-[28px] text-[#1e2939]">
                       {guidePages[currentPage].title}
                     </h2>
                   </div>

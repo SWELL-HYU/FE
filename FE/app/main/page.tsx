@@ -32,7 +32,7 @@ export default function MainPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 데이터 (님의 데이터 구조 유지 + 디자인용 필드 일부 활용)
+  // 데이터
   const allOutfits = [
     {
       id: 1,
@@ -170,7 +170,7 @@ export default function MainPage() {
 
   return (
     // 배경 그라디언트 적용
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.23)] via-[rgba(86,151,176,0.1)] to-gray-100 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]flex flex-col overflow-hidden">
       
       {/* 상단 네비게이션 */}
       <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
@@ -236,7 +236,7 @@ export default function MainPage() {
 
         {/* 스와이프 컨텐츠 */}
         <div
-          className={`max-w-[1400px] w-full flex gap-16 transition-opacity duration-300 ${
+          className={`max-w-[1400px] w-full flex gap-40 transition-opacity duration-300 ${
             isTransitioning ? "opacity-0" : "opacity-100"
           }`}
         >
@@ -281,7 +281,7 @@ export default function MainPage() {
           </div>
 
           {/* 오른쪽: 필터 + 상품 정보 (5:6 비율) */}
-          <div className="hidden md:flex w-[55%] flex-col overflow-hidden">
+          <div className="hidden md:flex flex-col overflow-hidden" style={{ width: '600px' }}>
             {/* 필터 영역 (상단 고정) */}
             <div className="mb-6 flex-shrink-0">
               <div className="mb-4">
@@ -387,7 +387,7 @@ export default function MainPage() {
       {/* 옷장 플로팅 버튼 (네비게이션 연동) */}
       <button
         onClick={() => router.push("/closet")}
-        className="fixed bottom-6 right-6 w-16 h-16 bg-[#FFF4EA] text-[#5697B0] border-4 border-white rounded-full shadow-2xl flex items-center justify-center text-2xl hover:bg-[#ffeedb] hover:scale-105 transition-all z-30 group"
+        className="fixed bottom-10 right-12 w-18 h-18 bg-[#FFF4EA] text-[#5697B0] border-4 border-white rounded-full shadow-2xl flex items-center justify-center text-5xl hover:bg-[#ffeedb] hover:scale-105 transition-all z-30 group"
       >
         <span className="group-hover:rotate-12 transition-transform duration-300">👜</span>
       </button>
