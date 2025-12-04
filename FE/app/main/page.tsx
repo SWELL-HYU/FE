@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getRecommendations, addFavorite, removeFavorite } from "@/lib/outfits";
+import { getRecommendations, addFavorite, removeFavorite, recordViewLog } from "@/lib/outfits";
 import { saveClosetItem } from "@/lib/closet";
 import { logout } from "@/lib/auth";
 import type { Outfit, Season, Style } from "@/types/api";
@@ -11,7 +11,7 @@ export default function MainPage() {
   const router = useRouter();
   
   // 상태 관리
-  const [outfits, setOutfits] = useState<Outfit[]>([]);
+  const [allOutfits, setAllOutfits] = useState<Outfit[]>([]); // 전체 추천 코디
   const [currentIndex, setCurrentIndex] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -19,10 +19,22 @@ export default function MainPage() {
   const [showDropdown, setShowDropdown] = useState(false);
   const [userName, setUserName] = useState("User");
   const [savedItems, setSavedItems] = useState<number[]>([]);
-  
+
   // 필터 상태
   const [selectedSeason, setSelectedSeason] = useState<Season | undefined>(undefined);
   const [selectedStyle, setSelectedStyle] = useState<Style | undefined>(undefined);
+
+  // 무한 스크롤 관련 상태
+  const [currentPage, setCurrentPage] = useState(1);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [viewStartTime, setViewStartTime] = useState<number>(Date.now());
+
+  // 필터링된 코디 목록 (클라이언트 사이드 필터링)
+  const outfits = allOutfits.filter(outfit => {
+    if (selectedSeason && outfit.season !== selectedSeason) return false;
+    if (selectedStyle && outfit.style !== selectedStyle) return false;
+    return true;
+  });
   
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -66,21 +78,20 @@ export default function MainPage() {
     }
   }, [router]);
 
-  // 코디 데이터 가져오기
+  // 코디 데이터 가져오기 (개인화 추천)
   const fetchOutfits = async () => {
     setLoading(true);
     setError("");
-    
+
     try {
       const response = await getRecommendations({
         page: 1,
         limit: 20,
-        season: selectedSeason,
-        style: selectedStyle,
       });
-      
-      setOutfits(response.data.outfits);
+
+      setAllOutfits(response.data.outfits);
       setCurrentIndex(0);
+      setViewStartTime(Date.now());
     } catch (err: any) {
       console.error("코디 로딩 실패:", err);
       setError("코디를 불러오는데 실패했습니다");
@@ -89,19 +100,62 @@ export default function MainPage() {
     }
   };
 
-  // 초기 로딩 + 필터 변경 시 재로딩
+  // 추가 코디 로딩 (백그라운드)
+  const loadMoreOutfits = async () => {
+    if (isLoadingMore) return; // 중복 호출 방지
+
+    setIsLoadingMore(true);
+    try {
+      const response = await getRecommendations({
+        page: currentPage + 1,
+        limit: 20,
+      });
+
+      setAllOutfits([...allOutfits, ...response.data.outfits]);
+      setCurrentPage(currentPage + 1);
+    } catch (err: any) {
+      console.error("추가 코디 로딩 실패:", err);
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  // 초기 로딩만 (필터는 클라이언트 사이드에서 처리)
   useEffect(() => {
     fetchOutfits();
+  }, []);
+
+  // 필터 변경 시 인덱스 리셋
+  useEffect(() => {
+    setCurrentIndex(0);
   }, [selectedSeason, selectedStyle]);
 
   const currentOutfit = outfits[currentIndex];
 
+  // View log 기록 함수
+  const recordCurrentView = async () => {
+    if (!currentOutfit) return;
+
+    const durationSeconds = Math.floor((Date.now() - viewStartTime) / 1000);
+
+    try {
+      await recordViewLog(currentOutfit.id, durationSeconds);
+    } catch (err: any) {
+      console.error("View log 기록 실패:", err);
+      // 에러가 나도 사용자 경험에 영향 없도록 무시
+    }
+  };
+
   // 네비게이션 함수
   const handlePrev = () => {
     if (currentIndex > 0 && !isTransitioning) {
+      // 현재 코디의 view log 기록 (백그라운드, await 없이)
+      recordCurrentView();
+
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentIndex(currentIndex - 1);
+        setViewStartTime(Date.now());
         setIsTransitioning(false);
       }, 300);
     }
@@ -109,30 +163,40 @@ export default function MainPage() {
 
   const handleNext = () => {
     if (currentIndex < outfits.length - 1 && !isTransitioning) {
+      // 현재 코디의 view log 기록 (백그라운드, await 없이)
+      recordCurrentView();
+
       setIsTransitioning(true);
       setTimeout(() => {
         setCurrentIndex(currentIndex + 1);
+        setViewStartTime(Date.now());
         setIsTransitioning(false);
       }, 300);
+
+      // 15번째 인덱스에서 백그라운드로 다음 페이지 로드
+      const actualIndex = allOutfits.findIndex(o => o.id === outfits[currentIndex + 1]?.id);
+      if (actualIndex === 14 && !isLoadingMore) { // 0-based index이므로 14 = 15번째
+        loadMoreOutfits();
+      }
     }
   };
 
   // 좋아요 토글
   const handleToggleLike = async () => {
     if (!currentOutfit) return;
-    
+
     try {
       if (currentOutfit.isFavorite) {
         await removeFavorite(currentOutfit.id);
-        setOutfits(outfits.map(outfit => 
-          outfit.id === currentOutfit.id 
+        setAllOutfits(allOutfits.map(outfit =>
+          outfit.id === currentOutfit.id
             ? { ...outfit, isFavorite: false }
             : outfit
         ));
       } else {
         await addFavorite(currentOutfit.id);
-        setOutfits(outfits.map(outfit => 
-          outfit.id === currentOutfit.id 
+        setAllOutfits(allOutfits.map(outfit =>
+          outfit.id === currentOutfit.id
             ? { ...outfit, isFavorite: true }
             : outfit
         ));
@@ -194,7 +258,7 @@ export default function MainPage() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">코디를 불러오는 중...</p>
+          <p className="text-gray-500">맞춤형 코디 리스트를 생성하고 있어요! 조금만 기다려 주세요</p>
         </div>
       </div>
     );

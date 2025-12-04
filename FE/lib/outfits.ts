@@ -6,34 +6,25 @@ import type {
   ApiSuccessResponse,
   Outfit,
   Pagination,
-  Season,
-  Style,
-  Gender,
 } from "@/types/api";
 
 /**
  * ============================================
  * 개인화 추천 코디 목록
- * GET /api/outfits
+ * GET /api/recommendations
  * ============================================
  */
 export const getRecommendations = async (params?: {
   page?: number;
   limit?: number;
-  season?: Season;
-  style?: Style;
-  gender?: Gender;
 }) => {
   const response = await api.get<ApiSuccessResponse<{
     outfits: Outfit[];
     pagination: Pagination;
-  }>>("/outfits", {
+  }>>("/recommendations", {
     params: {
       page: params?.page || 1,
       limit: params?.limit || 20,
-      season: params?.season || "all",
-      style: params?.style || "all",
-      gender: params?.gender || "all",
     },
   });
   return response.data;
