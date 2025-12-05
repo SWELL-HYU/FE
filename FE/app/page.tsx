@@ -32,7 +32,7 @@ export default function Home() {
           src="/videos/swell_spin.gif"
           alt="Swell Logo"
           className={`w-36 h-36 object-contain transition-all duration-[800ms] ${
-            fadeOut ? "scale-0 rotate-[180deg] opacity-0" : "scale-100 rotate-0 opacity-100"
+            fadeOut ? "scale-0 rotate-[0deg] opacity-0" : "scale-100 rotate-0 opacity-100"
           }`}
         />
       </div>

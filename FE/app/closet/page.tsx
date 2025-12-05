@@ -133,6 +133,7 @@ export default function ClosetPage() {
     if (!file) return;
 
     try {
+      console.log("📤 업로드 시작:", file.name, file.type, file.size);
       const response = await uploadProfilePhoto(file);
       console.log("✅ 업로드 응답:", response);
       console.log("📷 photoUrl:", response.data.photoUrl);
@@ -149,9 +150,14 @@ export default function ClosetPage() {
       setFittingStatus("idle");
       alert("사진이 업로드되었습니다!");
     } catch (err: any) {
-      console.error("❌ 업로드 에러:", err);
-      const errorMessage = err.response?.data?.error?.message || "사진 업로드 실패";
-      alert(errorMessage);
+      console.error("❌ 업로드 에러 전체:", err);
+      console.error("❌ 에러 메시지:", err.message);
+      console.error("❌ 에러 코드:", err.code);
+      console.error("❌ 응답 데이터:", err.response?.data);
+      console.error("❌ 응답 상태:", err.response?.status);
+
+      const errorMessage = err.response?.data?.error?.message || err.message || "사진 업로드 실패";
+      alert(`업로드 실패: ${errorMessage}`);
     }
   };
 
