@@ -84,12 +84,16 @@ export default function MainPage() {
     setError("");
 
     try {
+      // 새로고침 감지: sessionStorage 플래그 확인
+      const isNavigating = sessionStorage.getItem("mainPageNavigating");
+
       // 로컬 스토리지에서 저장된 상태 확인
       const savedOutfitsStr = localStorage.getItem("mainPageOutfits");
       const savedOutfitId = localStorage.getItem("mainPageCurrentOutfitId");
       const savedPage = localStorage.getItem("mainPageCurrentPage");
 
-      if (savedOutfitsStr && savedOutfitId) {
+      // 페이지 이동(네비게이션)인 경우에만 저장된 상태 복원
+      if (isNavigating && savedOutfitsStr && savedOutfitId) {
         // 저장된 코디 목록 복원
         const savedOutfits = JSON.parse(savedOutfitsStr);
         setAllOutfits(savedOutfits);
@@ -114,7 +118,9 @@ export default function MainPage() {
         setViewStartTime(Date.now());
         setLoading(false);
       } else {
-        // 새로운 추천 받기
+        // 새로고침이거나 저장된 데이터가 없는 경우 → 새로운 추천 받기
+        console.log(isNavigating ? "저장된 데이터 없음: 새로운 추천 요청" : "🔄 새로고침 감지: 새로운 추천 요청");
+
         const response = await getRecommendations({
           page: 1,
           limit: 20,
@@ -131,6 +137,9 @@ export default function MainPage() {
 
         console.log("새로운 추천 받음:", response.data.outfits.length, "개 코디");
       }
+
+      // 플래그 설정: 이 페이지에 있음을 표시
+      sessionStorage.setItem("mainPageNavigating", "true");
     } catch (err: any) {
       console.error("코디 로딩 실패:", err);
       setError("코디를 불러오는데 실패했습니다");
@@ -347,7 +356,7 @@ export default function MainPage() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">Swell이 당신의 취향을 찾는 중..</p>
+          <p className="text-gray-500">Swell이 당신의 취향을 찾고 있어요..</p>
         </div>
       </div>
     );
@@ -375,9 +384,13 @@ export default function MainPage() {
       
       {/* 상단 네비게이션 */}
       <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
-        <h1 
-          className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer font-snippet" 
-          onClick={() => window.location.reload()}
+        <h1
+          className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer font-snippet"
+          onClick={() => {
+            // 플래그 제거 후 새로고침 (새로운 추천 받기)
+            sessionStorage.removeItem("mainPageNavigating");
+            window.location.reload();
+          }}
         >
           Swell
         </h1>
@@ -401,7 +414,7 @@ export default function MainPage() {
                 }}
                 className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-[13px]"
               >
-                ❤️ Liked Outfits
+                ❤️ 좋아요한 코디
               </button>
               <button
                 onClick={() => {

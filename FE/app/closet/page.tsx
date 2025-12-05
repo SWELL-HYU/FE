@@ -47,7 +47,8 @@ export default function ClosetPage() {
   const [fittingResult, setFittingResult] = useState<string | null>(null);
   const [fittingStatus, setFittingStatus] = useState<"idle" | "processing" | "completed">("idle");
   const [fittingProgress, setFittingProgress] = useState<string>("");
-  
+  const [llmMessage, setLlmMessage] = useState<string | null>(null);
+
   // UI 상태
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -176,15 +177,22 @@ export default function ClosetPage() {
       const startResponse = await startFitting({ items: selectedItems });
       const jobId = startResponse.data.jobId;
       
-      setFittingProgress("AI가 피팅을 처리하고 있어요...");
+      setFittingProgress("멋진 사진 완성 중..");
       
       // 2. 상태 폴링
       const result = await pollFittingStatus(jobId);
       
       if (result.data.status === "completed") {
         setFittingResult(result.data.resultImageUrl || null);
+        setLlmMessage(result.data.llmMessage || null);
         setFittingStatus("completed");
         setFittingProgress("");
+        // 피팅 완료 시 큐 초기화
+        setFittingSlots({
+          상의: null,
+          하의: null,
+          아우터: null,
+        });
       } else if (result.data.status === "failed") {
         alert(`피팅 실패: ${result.data.error || "알 수 없는 오류"}`);
         setFittingStatus("idle");
@@ -209,8 +217,8 @@ export default function ClosetPage() {
     router.push("/start");
   };
 
-  // 피팅 가능 여부
-  const canFit = userPhoto && (fittingSlots.상의 || fittingSlots.하의 || fittingSlots.아우터);
+  // 피팅 가능 여부 (사진 있고, 아이템 1개 이상 선택되고, 완료 상태가 아닐 때)
+  const canFit = userPhoto && (fittingSlots.상의 || fittingSlots.하의 || fittingSlots.아우터) && fittingStatus !== "completed";
 
   if (loading) {
     return (
@@ -229,7 +237,10 @@ export default function ClosetPage() {
       <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
         <div className="flex items-center gap-4">
           <button
-            onClick={() => router.push("/main")}
+            onClick={() => {
+              sessionStorage.setItem("mainPageNavigating", "true");
+              router.push("/main");
+            }}
             className="text-gray-600 hover:text-gray-800 font-medium"
           >
             ← Main
@@ -256,7 +267,7 @@ export default function ClosetPage() {
                 }}
                 className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
               >
-                ❤️ Liked Outfits
+                ❤️ 좋아요한 코디
               </button>
               <button
                 onClick={() => {
@@ -283,7 +294,14 @@ export default function ClosetPage() {
               {fittingStatus === "processing" ? (
                 // 피팅 진행 중
                 <div className="h-full flex flex-col items-center justify-center p-8">
-                  <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <video
+                    src="/videos/logo_animation.mp4"
+                    autoPlay
+                    loop
+                    muted
+                    playsInline
+                    className="w-64 h-64 object-contain mb-4"
+                  />
                   <p className="text-gray-600 text-center font-medium">{fittingProgress}</p>
                   <p className="text-sm text-gray-400 mt-2">잠시만 기다려주세요...</p>
                 </div>
@@ -298,12 +316,22 @@ export default function ClosetPage() {
                   <button
                     onClick={() => {
                       setFittingResult(null);
+                      setLlmMessage(null);
                       setFittingStatus("idle");
                     }}
                     className="absolute top-4 right-4 px-4 py-2 bg-white/90 rounded-lg shadow hover:bg-white transition text-sm font-medium"
                   >
                     다시 피팅
                   </button>
+
+                  {/* LLM 메시지 */}
+                  {llmMessage && (
+                    <div className="absolute bottom-4 left-4 right-4 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/20">
+                      <p className="text-black text-sm leading-relaxed font-medium">
+                        💬 {llmMessage}
+                      </p>
+                    </div>
+                  )}
                 </div>
               ) : userPhoto ? (
                 // 업로드된 사진
@@ -362,7 +390,7 @@ export default function ClosetPage() {
 
           {/* 옷걸이 슬롯 */}
           <div className="w-[100px] ml-4 flex flex-col gap-3">
-            <p className="text-sm font-medium text-gray-600 text-center">옷걸이</p>
+            <p className="text-sm font-medium text-gray-600 text-center"></p>
             
             {(["상의", "하의", "아우터"] as const).map((slotCategory) => (
               <div 
@@ -372,20 +400,28 @@ export default function ClosetPage() {
                 <p className="text-xs text-gray-400 mb-1">{slotCategory}</p>
                 {getSlotItem(slotCategory) ? (
                   <div className="relative w-full">
-                    <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                      <span className="text-2xl">
-                        {slotCategory === "상의" ? "👔" : slotCategory === "하의" ? "👖" : "🧥"}
-                      </span>
+                    <div className="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+                      {getSlotItem(slotCategory)?.imageUrl ? (
+                        <img
+                          src={getSlotItem(slotCategory)!.imageUrl!}
+                          alt={getSlotItem(slotCategory)?.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center">
+                          <span className="text-2xl">
+                            {slotCategory === "상의" ? "👔" : slotCategory === "하의" ? "👖" : "🧥"}
+                          </span>
+                        </div>
+                      )}
                     </div>
+                    {/* 삭제 버튼을 이미지 컨테이너 밖으로 이동 */}
                     <button
                       onClick={() => handleRemoveFromSlot(slotCategory)}
-                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition"
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition shadow-md"
                     >
                       ✕
                     </button>
-                    <p className="text-xs text-center mt-1 truncate">
-                      {getSlotItem(slotCategory)?.name}
-                    </p>
                   </div>
                 ) : (
                   <div className="aspect-square w-full bg-gray-50 rounded-lg flex items-center justify-center">
@@ -417,24 +453,23 @@ export default function ClosetPage() {
           </div>
 
           {/* 아이템 그리드 */}
-          <div className="flex-1 overflow-auto">
+          <div className="flex-1 overflow-auto p-1">
             <div className="grid grid-cols-4 gap-3">
               {filteredItems.map((item) => {
                 const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
-                const isInSlot = 
-                  fittingSlots.상의 === item.id || 
-                  fittingSlots.하의 === item.id || 
+                const isInSlot =
+                  fittingSlots.상의 === item.id ||
+                  fittingSlots.하의 === item.id ||
                   fittingSlots.아우터 === item.id;
-                
+
                 return (
                   <div
                     key={item.id}
-                    className={`bg-white rounded-xl p-3 cursor-pointer transition-all ${
-                      isInSlot 
-                        ? "ring-2 ring-[#5697B0] bg-blue-50" 
-                        : "hover:shadow-lg hover:scale-105"
+                    className={`bg-white rounded-xl p-3 transition-all group relative ${
+                      isInSlot
+                        ? "ring-2 ring-[#5697B0] bg-blue-50"
+                        : "hover:shadow-lg"
                     }`}
-                    onClick={() => handleItemClick(item)}
                   >
                     {/* 아이템 이미지 */}
                     <div className="aspect-square bg-gray-50 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden">
@@ -445,13 +480,62 @@ export default function ClosetPage() {
                           {koreanCategory === "상의" ? "👔" : koreanCategory === "하의" ? "👖" : "🧥"}
                         </span>
                       )}
+
+                      {/* Hover 오버레이 */}
+                      <div className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center gap-2 p-2">
+                        {/* 삭제 버튼 (왼쪽 상단) */}
+                        <button
+                          onClick={async (e) => {
+                            e.stopPropagation();
+                            if (confirm('이 아이템을 옷장에서 삭제하시겠습니까?')) {
+                              try {
+                                await deleteClosetItem(item.id);
+                                await loadClosetItems();
+                                alert('삭제되었습니다');
+                              } catch (err: any) {
+                                alert(err.response?.data?.error?.message || '삭제 실패');
+                              }
+                            }
+                          }}
+                          className="absolute top-2 left-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition text-xs font-bold"
+                        >
+                          ✕
+                        </button>
+
+                        {/* 피팅에 추가 버튼 */}
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleItemClick(item);
+                          }}
+                          className="w-full px-3 py-2 bg-[#5697B0] text-white rounded-lg text-xs font-medium hover:bg-[#4a8299] transition"
+                        >
+                          {isInSlot ? '피팅에서 제거' : '피팅에 추가'}
+                        </button>
+
+                        {/* 구매 링크 방문 버튼 */}
+                        {item.purchaseUrl && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (item.purchaseUrl) {
+                                window.open(item.purchaseUrl, '_blank');
+                              }
+                            }}
+                            className="w-full px-3 py-2 bg-white text-gray-800 rounded-lg text-xs font-medium hover:bg-gray-100 transition"
+                          >
+                            구매 링크 방문
+                          </button>
+                        )}
+                      </div>
+
                       {isInSlot && (
                         <div className="absolute top-1 right-1 w-6 h-6 bg-[#5697B0] rounded-full flex items-center justify-center text-white text-xs">
                           ✓
                         </div>
                       )}
                     </div>
-                    
+
                     {/* 아이템 정보 */}
                     <p className="text-xs text-gray-400">{item.brand || "BRAND"}</p>
                     <p className="font-medium text-gray-800 text-sm truncate">{item.name}</p>
