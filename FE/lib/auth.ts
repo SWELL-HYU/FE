@@ -77,7 +77,7 @@ export const logout = async () => {
  * GET /api/auth/me
  * ============================================
  */
-export const getMe = async () => {
+export const getMe = async (): Promise<ApiSuccessResponse<{ user: User }>> => {
   const response = await api.get<
     ApiSuccessResponse<{
       user: User;

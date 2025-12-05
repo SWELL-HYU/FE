@@ -2,50 +2,118 @@
 // 가상 피팅 관련 API 함수들
 
 import api from "./api";
-import type {
-  ApiSuccessResponse,
-  FittingJob,
-  FittingHistoryItem,
-  Pagination,
-  StartFittingRequest,
-} from "@/types/api";
+import type { ApiSuccessResponse, Pagination } from "@/types/api";
 
 /**
  * ============================================
- * 6.1 가상 피팅 시작
+ * 가상 피팅 타입 정의
+ * ============================================
+ */
+
+export type FittingStatus = "processing" | "completed" | "failed" | "timeout";
+export type FittingCategory = "top" | "bottom" | "outer";
+
+export interface FittingItem {
+  itemId: number;
+  category: FittingCategory;
+}
+
+export interface StartFittingRequest {
+  items: FittingItem[];
+}
+
+export interface FittingJob {
+  jobId: number;
+  status: FittingStatus;
+  createdAt: string;
+}
+
+export interface FittingJobStatus {
+  jobId: number;
+  status: FittingStatus;
+  currentStep?: string;
+  resultImageUrl?: string;
+  llmMessage?: string;
+  completedAt?: string;
+  processingTime?: number;
+  error?: string;
+  failedStep?: string;
+  failedAt?: string;
+  timeoutAt?: string;
+}
+
+export interface FittingHistoryItem {
+  jobId: number;
+  status: FittingStatus;
+  resultImageUrl: string | null;
+  items: {
+    itemId: number;
+    category: string;
+    name: string;
+  }[];
+  createdAt: string;
+}
+
+/**
+ * ============================================
+ * 가상 피팅 시작
  * POST /api/virtual-fitting
  * ============================================
- * 참고: API 명세서 업데이트로 user_profile_url은 내부 처리됨
  */
 export const startFitting = async (data: StartFittingRequest) => {
-  const response = await api.post<
-    ApiSuccessResponse<{
-      jobId: number;
-      message: string;
-    }>
-  >("/virtual-fitting", data);
+  const response = await api.post<ApiSuccessResponse<FittingJob>>(
+    "/virtual-fitting",
+    data
+  );
   return response.data;
 };
 
 /**
  * ============================================
- * 6.2 가상 피팅 상태 조회
- * GET /api/virtual-fitting/{jobId}/status
+ * 가상 피팅 상태 조회
+ * GET /api/virtual-fitting/{jobId}
  * ============================================
- * 폴링(Polling)으로 사용: 2초마다 호출하여 상태 확인
  */
 export const getFittingStatus = async (jobId: number) => {
-  const response = await api.get<
-    ApiSuccessResponse<{
-      job: FittingJob;
-    }>
-  >(`/virtual-fitting/${jobId}/status`);
+  const response = await api.get<ApiSuccessResponse<FittingJobStatus>>(
+    `/virtual-fitting/${jobId}`
+  );
   return response.data;
 };
 
 /**
  * ============================================
- * 6.3 가상 피팅 이력 조회
+ * 가상 피팅 상태 폴링
+ * 완료/실패/타임아웃까지 2초 간격으로 폴링
+ * ============================================
+ */
+export const pollFittingStatus = async (
+  jobId: number,
+  maxAttempts: number = 60 // 최대 2분 (2초 x 60)
+): Promise<ApiSuccessResponse<FittingJobStatus>> => {
+  let attempts = 0;
+
+  while (attempts < maxAttempts) {
+    const result = await getFittingStatus(jobId);
+    const status = result.data.status;
+
+    // 완료, 실패, 타임아웃 상태면 결과 반환
+    if (status === "completed" || status === "failed" || status === "timeout") {
+      return result;
+    }
+
+    // 2초 대기
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    attempts++;
+  }
+
+  // 최대 시도 횟수 초과
+  throw new Error("피팅 상태 조회 시간 초과");
+};
+
+/**
+ * ============================================
+ * 가상 피팅 이력 조회
  * GET /api/virtual-fitting
  * ============================================
  */
@@ -69,7 +137,7 @@ export const getFittingHistory = async (params?: {
 
 /**
  * ============================================
- * 6.4 가상 피팅 이력 삭제
+ * 가상 피팅 이력 삭제
  * DELETE /api/virtual-fitting/{jobId}
  * ============================================
  */
@@ -81,65 +149,4 @@ export const deleteFittingHistory = async (jobId: number) => {
     }>
   >(`/virtual-fitting/${jobId}`);
   return response.data;
-};
-
-/**
- * ============================================
- * 유틸리티: 피팅 완료까지 대기 (폴링)
- * ============================================
- * 사용 예시:
- * const result = await waitForFitting(jobId, {
- *   onProgress: (job) => console.log('현재 단계:', job.currentStep)
- * });
- */
-export const waitForFitting = async (
-  jobId: number,
-  options?: {
-    interval?: number; // 폴링 간격 (기본: 2000ms)
-    timeout?: number; // 최대 대기 시간 (기본: 60000ms)
-    onProgress?: (job: FittingJob) => void; // 진행 상황 콜백
-  }
-): Promise<FittingJob> => {
-  const interval = options?.interval || 2000;
-  const timeout = options?.timeout || 60000;
-  const startTime = Date.now();
-
-  return new Promise((resolve, reject) => {
-    const poll = async () => {
-      try {
-        const response = await getFittingStatus(jobId);
-        const job = response.data.job;
-
-        // 진행 상황 콜백 호출
-        if (options?.onProgress) {
-          options.onProgress(job);
-        }
-
-        // 완료 상태 확인
-        if (job.status === "completed") {
-          resolve(job);
-          return;
-        }
-
-        // 실패 상태 확인
-        if (job.status === "failed" || job.status === "timeout") {
-          reject(new Error(`피팅 실패: ${job.status}`));
-          return;
-        }
-
-        // 타임아웃 체크
-        if (Date.now() - startTime > timeout) {
-          reject(new Error("피팅 대기 시간 초과"));
-          return;
-        }
-
-        // 다음 폴링 예약
-        setTimeout(poll, interval);
-      } catch (error) {
-        reject(error);
-      }
-    };
-
-    poll();
-  });
 };

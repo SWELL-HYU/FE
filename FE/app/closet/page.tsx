@@ -2,13 +2,37 @@
 
 import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import { getClosetItems, deleteClosetItem } from "@/lib/closet";
+import { uploadProfilePhoto } from "@/lib/profile";
+import { startFitting, pollFittingStatus } from "@/lib/fitting";
+import type { ClosetItem } from "@/lib/closet";
+import type { FittingCategory } from "@/lib/fitting";
+
+// 카테고리 매핑 (한글 ↔ 영문)
+const CATEGORY_MAP: Record<string, FittingCategory> = {
+  "상의": "top",
+  "하의": "bottom",
+  "아우터": "outer",
+};
+
+const CATEGORY_MAP_REVERSE: Record<FittingCategory, string> = {
+  "top": "상의",
+  "bottom": "하의",
+  "outer": "아우터",
+};
 
 export default function ClosetPage() {
   const router = useRouter();
-  const { user, loading } = useAuth(true);
   
+  // 인증 상태
+  const [loading, setLoading] = useState(true);
+  const [userName, setUserName] = useState("User");
+  
+  // 옷장 데이터
+  const [closetItems, setClosetItems] = useState<ClosetItem[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체");
+  
+  // 가상 피팅 상태
   const [fittingSlots, setFittingSlots] = useState<{
     상의: number | null;
     하의: number | null;
@@ -18,12 +42,31 @@ export default function ClosetPage() {
     하의: null,
     아우터: null,
   });
+  
   const [userPhoto, setUserPhoto] = useState<string | null>(null);
   const [fittingResult, setFittingResult] = useState<string | null>(null);
   const [fittingStatus, setFittingStatus] = useState<"idle" | "processing" | "completed">("idle");
+  const [fittingProgress, setFittingProgress] = useState<string>("");
+  
+  // UI 상태
   const [showDropdown, setShowDropdown] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // 초기화
+  useEffect(() => {
+    const token = sessionStorage.getItem("token");
+    if (!token) {
+      router.push("/start");
+      return;
+    }
+    
+    const storedName = sessionStorage.getItem("userName");
+    if (storedName) setUserName(storedName);
+    
+    loadClosetItems();
+    setLoading(false);
+  }, [router]);
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -36,36 +79,37 @@ export default function ClosetPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // 카테고리 목록
+  // 옷장 아이템 로드
+  const loadClosetItems = async () => {
+    try {
+      const response = await getClosetItems({ category: "all", limit: 50 });
+      setClosetItems(response.data.items);
+    } catch (err: any) {
+      console.error("옷장 로딩 실패:", err);
+      console.error("에러 메시지:", err.response?.data?.error?.message);
+    }
+  };
+
+  // 카테고리 필터링
   const categories = ["전체", "상의", "하의", "아우터"];
-
-  // 임시 옷장 데이터 (나중에 API에서 받아옴)
-  const closetItems = [
-    { id: 101, name: "오버핏 린넨 셔츠", brand: "ZARA", category: "상의", price: 59000 },
-    { id: 102, name: "와이드 치노 팬츠", brand: "UNIQLO", category: "하의", price: 39000 },
-    { id: 201, name: "쿨맥스 반팔 티", brand: "COS", category: "상의", price: 45000 },
-    { id: 202, name: "라이트 데님 쇼츠", brand: "LEVIS", category: "하의", price: 89000 },
-    { id: 301, name: "그래픽 후디", brand: "STUSSY", category: "아우터", price: 149000 },
-    { id: 302, name: "카고 조거 팬츠", brand: "NIKE", category: "하의", price: 99000 },
-    { id: 401, name: "라이트 패딩", brand: "NORTHFACE", category: "아우터", price: 189000 },
-    { id: 402, name: "크롭 가디건", brand: "ZARA", category: "아우터", price: 79000 },
-  ];
-
-  // 필터링된 아이템
   const filteredItems = selectedCategory === "전체" 
     ? closetItems 
-    : closetItems.filter(item => item.category === selectedCategory);
+    : closetItems.filter(item => {
+        const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
+        return koreanCategory === selectedCategory;
+      });
 
-  // 아이템 클릭 시 옷걸이에 추가
-  const handleItemClick = (item: typeof closetItems[0]) => {
-    const slotCategory = item.category as "상의" | "하의" | "아우터";
+  // 아이템 클릭 시 슬롯에 추가/제거
+  const handleItemClick = (item: ClosetItem) => {
+    const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
+    if (!koreanCategory) return;
     
-    if (slotCategory === "상의" || slotCategory === "하의" || slotCategory === "아우터") {
-      setFittingSlots(prev => ({
-        ...prev,
-        [slotCategory]: prev[slotCategory] === item.id ? null : item.id
-      }));
-    }
+    const slotCategory = koreanCategory as "상의" | "하의" | "아우터";
+    
+    setFittingSlots(prev => ({
+      ...prev,
+      [slotCategory]: prev[slotCategory] === item.id ? null : item.id
+    }));
   };
 
   // 슬롯에서 아이템 제거
@@ -76,43 +120,92 @@ export default function ClosetPage() {
     }));
   };
 
-  // 사진 업로드
-  const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setUserPhoto(reader.result as string);
-        setFittingResult(null);
-        setFittingStatus("idle");
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  // 가상 피팅 실행
-  const handleFitting = () => {
-    const hasItems = fittingSlots.상의 || fittingSlots.하의 || fittingSlots.아우터;
-    if (!userPhoto || !hasItems) return;
-    
-    setFittingStatus("processing");
-    
-    // 임시: 3초 후 완료 (실제로는 API 호출)
-    setTimeout(() => {
-      setFittingResult("fitting-result");
-      setFittingStatus("completed");
-    }, 3000);
-  };
-
-  // 슬롯에 있는 아이템 정보 가져오기
+  // 슬롯의 아이템 정보 가져오기
   const getSlotItem = (slotCategory: "상의" | "하의" | "아우터") => {
     const itemId = fittingSlots[slotCategory];
     return itemId ? closetItems.find(item => item.id === itemId) : null;
   };
 
+  // 프로필 사진 업로드
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const response = await uploadProfilePhoto(file);
+      console.log("✅ 업로드 응답:", response);
+      console.log("📷 photoUrl:", response.data.photoUrl);
+
+      // 백엔드 URL을 절대 경로로 변환
+      const fullPhotoUrl = response.data.photoUrl.startsWith("http")
+        ? response.data.photoUrl
+        : `http://localhost:8000${response.data.photoUrl}`;
+
+      console.log("🌐 전체 URL:", fullPhotoUrl);
+
+      setUserPhoto(fullPhotoUrl);
+      setFittingResult(null);
+      setFittingStatus("idle");
+      alert("사진이 업로드되었습니다!");
+    } catch (err: any) {
+      console.error("❌ 업로드 에러:", err);
+      const errorMessage = err.response?.data?.error?.message || "사진 업로드 실패";
+      alert(errorMessage);
+    }
+  };
+
+  // 가상 피팅 실행
+  const handleFitting = async () => {
+    const selectedItems = Object.entries(fittingSlots)
+      .filter(([_, id]) => id !== null)
+      .map(([koreanCat, id]) => ({
+        itemId: id!,
+        category: CATEGORY_MAP[koreanCat as "상의" | "하의" | "아우터"]
+      }));
+    
+    if (selectedItems.length === 0) {
+      alert("최소 1개 이상의 아이템을 선택해주세요");
+      return;
+    }
+    
+    setFittingStatus("processing");
+    setFittingProgress("피팅 시작 중...");
+    
+    try {
+      // 1. 피팅 시작
+      const startResponse = await startFitting({ items: selectedItems });
+      const jobId = startResponse.data.jobId;
+      
+      setFittingProgress("AI가 피팅을 처리하고 있어요...");
+      
+      // 2. 상태 폴링
+      const result = await pollFittingStatus(jobId);
+      
+      if (result.data.status === "completed") {
+        setFittingResult(result.data.resultImageUrl || null);
+        setFittingStatus("completed");
+        setFittingProgress("");
+      } else if (result.data.status === "failed") {
+        alert(`피팅 실패: ${result.data.error || "알 수 없는 오류"}`);
+        setFittingStatus("idle");
+        setFittingProgress("");
+      } else if (result.data.status === "timeout") {
+        alert("피팅 처리 시간이 초과되었습니다. 다시 시도해주세요.");
+        setFittingStatus("idle");
+        setFittingProgress("");
+      }
+    } catch (err: any) {
+      console.error("피팅 실패:", err);
+      alert(err.response?.data?.error?.message || "피팅 요청 실패");
+      setFittingStatus("idle");
+      setFittingProgress("");
+    }
+  };
+
   // 로그아웃
   const handleLogout = () => {
     sessionStorage.removeItem("token");
+    sessionStorage.removeItem("userName");
     router.push("/start");
   };
 
@@ -121,24 +214,27 @@ export default function ClosetPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-gray-500">로딩 중...</p>
+      <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-gray-500">로딩 중...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="h-screen bg-gray-100 flex flex-col overflow-hidden">
+    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
       {/* 상단 네비게이션 */}
-      <nav className="bg-white shadow-sm px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
+      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
         <div className="flex items-center gap-4">
           <button
             onClick={() => router.push("/main")}
-            className="text-gray-600 hover:text-gray-800"
+            className="text-gray-600 hover:text-gray-800 font-medium"
           >
-            ← 메인
+            ← Main
           </button>
-          <h1 className="text-xl font-bold text-gray-800">내 옷장</h1>
+          <h1 className="text-xl font-bold text-gray-800">My Closet</h1>
         </div>
         
         {/* 프로필 드롭다운 */}
@@ -147,8 +243,8 @@ export default function ClosetPage() {
             onClick={() => setShowDropdown(!showDropdown)}
             className="flex items-center gap-2 text-gray-600 hover:text-gray-800"
           >
-            <span>{user?.name}님</span>
-            <span className={`transition-transform ${showDropdown ? "rotate-180" : ""}`}>▼</span>
+            <span className="font-medium">{userName}</span>
+            <span className={`transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}>▼</span>
           </button>
           
           {showDropdown && (
@@ -158,18 +254,18 @@ export default function ClosetPage() {
                   router.push("/favorites");
                   setShowDropdown(false);
                 }}
-                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
               >
-                ❤️ 좋아요 목록
+                ❤️ Liked Outfits
               </button>
               <button
                 onClick={() => {
-                  router.push("/main");
+                  handleLogout();
                   setShowDropdown(false);
                 }}
-                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2"
+                className="w-full px-4 py-2 text-left hover:bg-gray-50 flex items-center gap-2 text-sm"
               >
-                🚪 로그아웃
+                🚪 Logout
               </button>
             </div>
           )}
@@ -186,38 +282,43 @@ export default function ClosetPage() {
             <div className="flex-1 bg-white rounded-2xl shadow-lg overflow-hidden relative">
               {fittingStatus === "processing" ? (
                 // 피팅 진행 중
-                <div className="h-full flex flex-col items-center justify-center">
-                  <div className="text-6xl mb-4 animate-bounce">👕</div>
-                  <p className="text-gray-600">AI가 피팅 결과를 생성하고 있어요...</p>
-                  <p className="text-sm text-gray-400 mt-2">잠시만 기다려주세요</p>
+                <div className="h-full flex flex-col items-center justify-center p-8">
+                  <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-600 text-center font-medium">{fittingProgress}</p>
+                  <p className="text-sm text-gray-400 mt-2">잠시만 기다려주세요...</p>
                 </div>
               ) : fittingResult ? (
                 // 피팅 결과
-                <div className="h-full flex flex-col">
-                  <div className="flex-1 bg-gray-200 flex items-center justify-center">
-                    <div className="text-center text-gray-400">
-                      <p className="text-8xl mb-4">👤</p>
-                      <p className="text-lg">피팅 결과 이미지</p>
-                    </div>
-                  </div>
-                  {/* AI 코멘트 */}
-                  <div className="p-4 bg-blue-50 border-t border-blue-200">
-                    <div className="flex items-start gap-2">
-                      <span className="text-xl">💬</span>
-                      <p className="text-sm text-gray-700">
-                        선택하신 아이템들의 조합이 정말 잘 어울려요! 
-                        깔끔하면서도 트렌디한 느낌을 줄 수 있는 코디네요. 👍
-                      </p>
-                    </div>
-                  </div>
+                <div className="h-full relative">
+                  <img
+                    src={fittingResult}
+                    alt="피팅 결과"
+                    className="w-full h-full object-contain"
+                  />
+                  <button
+                    onClick={() => {
+                      setFittingResult(null);
+                      setFittingStatus("idle");
+                    }}
+                    className="absolute top-4 right-4 px-4 py-2 bg-white/90 rounded-lg shadow hover:bg-white transition text-sm font-medium"
+                  >
+                    다시 피팅
+                  </button>
                 </div>
               ) : userPhoto ? (
                 // 업로드된 사진
-                <img 
-                  src={userPhoto} 
-                  alt="내 사진" 
-                  className="w-full h-full object-contain bg-gray-100 flex items-center justify-center"
-                />
+                <div className="h-full relative">
+                  <img
+                    src={userPhoto}
+                    alt="내 사진"
+                    className="w-full h-full object-contain"
+                    onLoad={() => console.log("✅ 이미지 로드 성공:", userPhoto)}
+                    onError={(e) => {
+                      console.error("❌ 이미지 로드 실패:", userPhoto);
+                      console.error("에러 상세:", e);
+                    }}
+                  />
+                </div>
               ) : (
                 // 업로드 영역
                 <div 
@@ -243,12 +344,8 @@ export default function ClosetPage() {
             <div className="mt-4 flex gap-3">
               {userPhoto && (
                 <button
-                  onClick={() => {
-                    setUserPhoto(null);
-                    setFittingResult(null);
-                    setFittingStatus("idle");
-                  }}
-                  className="px-6 py-3 border border-gray-300 rounded-xl hover:bg-gray-50 transition"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition font-medium"
                 >
                   사진 변경
                 </button>
@@ -256,100 +353,62 @@ export default function ClosetPage() {
               <button
                 onClick={handleFitting}
                 disabled={!canFit || fittingStatus === "processing"}
-                className="flex-1 py-3 bg-blue-500 text-white rounded-xl font-medium hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
+                className="flex-1 py-3 bg-[#5697B0] text-white rounded-xl font-medium hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed transition"
               >
-                {fittingStatus === "processing" ? "피팅 중..." : "👤 가상 피팅 시작"}
+                {fittingStatus === "processing" ? "피팅 중..." : "피팅 확인하기"}
               </button>
             </div>
           </div>
 
-          {/* 옷걸이 큐 (세로 플로팅) */}
+          {/* 옷걸이 슬롯 */}
           <div className="w-[100px] ml-4 flex flex-col gap-3">
             <p className="text-sm font-medium text-gray-600 text-center">옷걸이</p>
             
-            {/* 상의 슬롯 */}
-            <div className="flex-1 bg-white rounded-xl shadow border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-2 relative">
-              <p className="text-xs text-gray-400 mb-1">상의</p>
-              {getSlotItem("상의") ? (
-                <div className="relative w-full">
-                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">👔</span>
+            {(["상의", "하의", "아우터"] as const).map((slotCategory) => (
+              <div 
+                key={slotCategory}
+                className="flex-1 bg-white rounded-xl shadow border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-2 relative"
+              >
+                <p className="text-xs text-gray-400 mb-1">{slotCategory}</p>
+                {getSlotItem(slotCategory) ? (
+                  <div className="relative w-full">
+                    <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
+                      <span className="text-2xl">
+                        {slotCategory === "상의" ? "👔" : slotCategory === "하의" ? "👖" : "🧥"}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => handleRemoveFromSlot(slotCategory)}
+                      className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition"
+                    >
+                      ✕
+                    </button>
+                    <p className="text-xs text-center mt-1 truncate">
+                      {getSlotItem(slotCategory)?.name}
+                    </p>
                   </div>
-                  <button
-                    onClick={() => handleRemoveFromSlot("상의")}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                  >
-                    ✕
-                  </button>
-                  <p className="text-xs text-center mt-1 truncate">{getSlotItem("상의")?.name}</p>
-                </div>
-              ) : (
-                <div className="aspect-square w-full bg-gray-50 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-300 text-2xl">+</span>
-                </div>
-              )}
-            </div>
-
-            {/* 하의 슬롯 */}
-            <div className="flex-1 bg-white rounded-xl shadow border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-2 relative">
-              <p className="text-xs text-gray-400 mb-1">하의</p>
-              {getSlotItem("하의") ? (
-                <div className="relative w-full">
-                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">👖</span>
+                ) : (
+                  <div className="aspect-square w-full bg-gray-50 rounded-lg flex items-center justify-center">
+                    <span className="text-gray-300 text-2xl">+</span>
                   </div>
-                  <button
-                    onClick={() => handleRemoveFromSlot("하의")}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                  >
-                    ✕
-                  </button>
-                  <p className="text-xs text-center mt-1 truncate">{getSlotItem("하의")?.name}</p>
-                </div>
-              ) : (
-                <div className="aspect-square w-full bg-gray-50 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-300 text-2xl">+</span>
-                </div>
-              )}
-            </div>
-
-            {/* 아우터 슬롯 */}
-            <div className="flex-1 bg-white rounded-xl shadow border-2 border-dashed border-gray-300 flex flex-col items-center justify-center p-2 relative">
-              <p className="text-xs text-gray-400 mb-1">아우터</p>
-              {getSlotItem("아우터") ? (
-                <div className="relative w-full">
-                  <div className="aspect-square bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-2xl">🧥</span>
-                  </div>
-                  <button
-                    onClick={() => handleRemoveFromSlot("아우터")}
-                    className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center"
-                  >
-                    ✕
-                  </button>
-                  <p className="text-xs text-center mt-1 truncate">{getSlotItem("아우터")?.name}</p>
-                </div>
-              ) : (
-                <div className="aspect-square w-full bg-gray-50 rounded-lg flex items-center justify-center">
-                  <span className="text-gray-300 text-2xl">+</span>
-                </div>
-              )}
-            </div>
+                )}
+              </div>
+            ))}
           </div>
         </div>
 
         {/* 오른쪽: 옷장 아이템 목록 */}
-        <div className="w-[55%] bg-gray-50 border-l border-gray-200 p-6 flex flex-col overflow-hidden">
+        <div className="w-[55%] bg-transparent p-6 flex flex-col overflow-hidden">
           {/* 카테고리 필터 */}
           <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-3 py-1.5 rounded-full text-sm transition ${
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   selectedCategory === category
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                    ? "bg-[#5697B0] text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                 }`}
               >
                 {category}
@@ -359,44 +418,48 @@ export default function ClosetPage() {
 
           {/* 아이템 그리드 */}
           <div className="flex-1 overflow-auto">
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-4 gap-3">
               {filteredItems.map((item) => {
+                const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
                 const isInSlot = 
                   fittingSlots.상의 === item.id || 
                   fittingSlots.하의 === item.id || 
                   fittingSlots.아우터 === item.id;
-                const canAddToSlot = item.category === "상의" || item.category === "하의" || item.category === "아우터";
                 
                 return (
                   <div
                     key={item.id}
-                    className={`bg-gray-50 rounded-xl p-3 cursor-pointer transition ${
+                    className={`bg-white rounded-xl p-3 cursor-pointer transition-all ${
                       isInSlot 
-                        ? "ring-2 ring-blue-500 bg-blue-50" 
-                        : canAddToSlot 
-                          ? "hover:shadow-md hover:bg-gray-100" 
-                          : "opacity-50 cursor-not-allowed"
+                        ? "ring-2 ring-[#5697B0] bg-blue-50" 
+                        : "hover:shadow-lg hover:scale-105"
                     }`}
-                    onClick={() => canAddToSlot && handleItemClick(item)}
+                    onClick={() => handleItemClick(item)}
                   >
                     {/* 아이템 이미지 */}
-                    <div className="aspect-square bg-white rounded-lg mb-2 flex items-center justify-center relative">
-                      <span className="text-3xl">
-                        {item.category === "상의" ? "👔" : item.category === "하의" ? "👖" : item.category === "아우터" ? "🧥" : "👟"}
-                      </span>
+                    <div className="aspect-square bg-gray-50 rounded-lg mb-2 flex items-center justify-center relative overflow-hidden">
+                      {item.imageUrl ? (
+                        <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                      ) : (
+                        <span className="text-3xl">
+                          {koreanCategory === "상의" ? "👔" : koreanCategory === "하의" ? "👖" : "🧥"}
+                        </span>
+                      )}
                       {isInSlot && (
-                        <div className="absolute top-1 right-1 w-5 h-5 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs">
+                        <div className="absolute top-1 right-1 w-6 h-6 bg-[#5697B0] rounded-full flex items-center justify-center text-white text-xs">
                           ✓
                         </div>
                       )}
                     </div>
                     
                     {/* 아이템 정보 */}
-                    <p className="text-xs text-gray-400">{item.brand}</p>
+                    <p className="text-xs text-gray-400">{item.brand || "BRAND"}</p>
                     <p className="font-medium text-gray-800 text-sm truncate">{item.name}</p>
-                    <p className="text-blue-600 font-bold text-sm mt-1">
-                      {item.price.toLocaleString()}원
-                    </p>
+                    {item.price && (
+                      <p className="text-[#5697B0] font-bold text-sm mt-1">
+                        {item.price.toLocaleString()}원
+                      </p>
+                    )}
                   </div>
                 );
               })}
@@ -404,7 +467,10 @@ export default function ClosetPage() {
 
             {filteredItems.length === 0 && (
               <div className="flex items-center justify-center h-40 text-gray-400">
-                이 카테고리에 저장된 아이템이 없어요
+                <div className="text-center">
+                  <p className="text-5xl mb-2">📦</p>
+                  <p>이 카테고리에 저장된 아이템이 없어요</p>
+                </div>
               </div>
             )}
           </div>

@@ -347,7 +347,7 @@ export default function MainPage() {
       <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)]">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-[#5697B0] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-500">맞춤형 코디 리스트를 생성하고 있어요! 조금만 기다려 주세요</p>
+          <p className="text-gray-500">Swell이 당신의 취향을 찾는 중..</p>
         </div>
       </div>
     );

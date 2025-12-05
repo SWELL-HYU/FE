@@ -1,5 +1,5 @@
 // lib/closet.ts
-// 옷장 관리 관련 API 함수들 (실제 백엔드 구현 기반)
+// 옷장 관리 관련 API 함수들 (완전 버전)
 
 import api from "./api";
 import type {
@@ -20,7 +20,7 @@ export interface ClosetItem {
   price: number | null;
   imageUrl: string | null;
   purchaseUrl: string | null;
-  savedAt: string; // ISO 8601
+  savedAt: string;
 }
 
 export interface CategoryCounts {
