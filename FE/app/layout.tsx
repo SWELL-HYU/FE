@@ -1,29 +1,27 @@
 // app/layout.tsx
 import type { Metadata } from "next";
-import { Snippet, Noto_Sans_KR, Abyssinica_SIL } from "next/font/google";
+import { Outfit, Manrope, Noto_Sans_KR } from "next/font/google";
 import "./globals.css";
 
-// Snippet 폰트 (Swell 로고용)
-const snippet = Snippet({
-  weight: "400",
+// Outfit (제목/로고/영문 강조용)
+const outfit = Outfit({
   subsets: ["latin"],
-  variable: "--font-snippet",
+  variable: "--font-outfit",
   display: "swap",
 });
 
-// Noto Sans KR (한글용 - 일반 텍스트)
+// Manrope (본문용 - 영문/숫자 최적화)
+const manrope = Manrope({
+  subsets: ["latin"],
+  variable: "--font-manrope",
+  display: "swap",
+});
+
+// Noto Sans KR (한글용)
 const notoSansKr = Noto_Sans_KR({
-  weight: ["400", "700"],
+  weight: ["400", "500", "700"],
   subsets: ["latin"],
   variable: "--font-noto-sans",
-  display: "swap",
-});
-
-// ✅ Abyssinica SIL 추가
-const abyssinicaSil = Abyssinica_SIL({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-abyssinica",
   display: "swap",
 });
 
@@ -40,9 +38,9 @@ export default function RootLayout({
   return (
     <html
       lang="ko"
-      className={`${snippet.variable} ${notoSansKr.variable} ${abyssinicaSil.variable}`}
+      className={`${outfit.variable} ${manrope.variable} ${notoSansKr.variable}`}
     >
-      <body className={notoSansKr.className}>
+      <body className={manrope.className}>
         {children}
       </body>
     </html>

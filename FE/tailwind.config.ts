@@ -9,13 +9,21 @@ const config: Config = {
   theme: {
     extend: {
       fontFamily: {
-        snippet: ["var(--font-snippet)", "sans-serif"],
-        noto: ["var(--font-noto-sans)", "sans-serif"],
-        abyssinica: ["var(--font-abyssinica)", "serif"],
+        outfit: ["var(--font-outfit)", "sans-serif"],
+        manrope: ["var(--font-manrope)", "var(--font-noto-sans)", "sans-serif"], // 영문은 Manrope, 한글은 Noto Sans
       },
       colors: {
         background: "var(--background)",
         foreground: "var(--foreground)",
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0', transform: 'translateY(10px)' },
+          '100%': { opacity: '1', transform: 'translateY(0)' },
+        },
+      },
+      animation: {
+        fadeIn: 'fadeIn 0.5s ease-out forwards',
       },
     },
   },

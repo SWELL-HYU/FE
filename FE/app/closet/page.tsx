@@ -59,6 +59,9 @@ export default function ClosetPage() {
   // 모바일 탭 상태 ('fitting' | 'items')
   const [activeTab, setActiveTab] = useState<'fitting' | 'items'>('fitting');
 
+  // 모바일 아이템 오버레이 상태
+  const [mobileSelectedItemId, setMobileSelectedItemId] = useState<number | null>(null);
+
   // 초기화
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -544,8 +547,8 @@ export default function ClosetPage() {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${selectedCategory === category
-                    ? "bg-[#5697B0] text-white"
-                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                  ? "bg-[#5697B0] text-white"
+                  : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                   }`}
               >
                 {category}
@@ -567,8 +570,8 @@ export default function ClosetPage() {
                   <div
                     key={item.id}
                     className={`bg-white rounded-xl p-3 transition-all group relative ${isInSlot
-                        ? "ring-2 ring-[#5697B0] bg-blue-50"
-                        : "hover:shadow-lg"
+                      ? "ring-2 ring-[#5697B0] bg-blue-50"
+                      : "hover:shadow-lg"
                       }`}
                   >
                     {/* 아이템 이미지 */}
@@ -668,8 +671,8 @@ export default function ClosetPage() {
           <button
             onClick={() => setActiveTab('fitting')}
             className={`flex-1 py-3 text-sm font-medium transition-all ${activeTab === 'fitting'
-                ? 'text-[#5697B0] border-b-2 border-[#5697B0]'
-                : 'text-gray-500'
+              ? 'text-[#5697B0] border-b-2 border-[#5697B0]'
+              : 'text-gray-500'
               }`}
           >
             가상 피팅
@@ -677,8 +680,8 @@ export default function ClosetPage() {
           <button
             onClick={() => setActiveTab('items')}
             className={`flex-1 py-3 text-sm font-medium transition-all ${activeTab === 'items'
-                ? 'text-[#5697B0] border-b-2 border-[#5697B0]'
-                : 'text-gray-500'
+              ? 'text-[#5697B0] border-b-2 border-[#5697B0]'
+              : 'text-gray-500'
               }`}
           >
             아이템 목록
@@ -828,8 +831,8 @@ export default function ClosetPage() {
                   key={category}
                   onClick={() => setSelectedCategory(category)}
                   className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${selectedCategory === category
-                      ? "bg-[#5697B0] text-white"
-                      : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
+                    ? "bg-[#5697B0] text-white"
+                    : "bg-white text-gray-600 hover:bg-gray-50 border border-gray-200"
                     }`}
                 >
                   {category}
@@ -850,10 +853,10 @@ export default function ClosetPage() {
                   return (
                     <div
                       key={item.id}
-                      onClick={() => handleItemClick(item)}
+                      onClick={() => setMobileSelectedItemId(mobileSelectedItemId === item.id ? null : item.id)}
                       className={`bg-white rounded-xl p-2.5 transition-all ${isInSlot
-                          ? "ring-2 ring-[#5697B0] bg-blue-50"
-                          : "shadow hover:shadow-md"
+                        ? "ring-2 ring-[#5697B0] bg-blue-50"
+                        : "shadow hover:shadow-md"
                         }`}
                     >
                       {/* 아이템 이미지 */}
@@ -865,7 +868,41 @@ export default function ClosetPage() {
                             {koreanCategory === "상의" ? "👔" : koreanCategory === "하의" ? "👖" : "🧥"}
                           </span>
                         )}
-                        {isInSlot && (
+
+                        {/* 모바일 오버레이 */}
+                        {mobileSelectedItemId === item.id && (
+                          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center gap-2 p-2 animate-fadeIn">
+                            {/* 피팅에 추가/제거 버튼 */}
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleItemClick(item);
+                                setMobileSelectedItemId(null);
+                              }}
+                              className="w-full px-3 py-2 bg-[#5697B0] text-white rounded-lg text-xs font-medium hover:bg-[#4a8299] transition"
+                            >
+                              {isInSlot ? '피팅에서 제거' : '피팅에 추가'}
+                            </button>
+
+                            {/* 구매 링크 방문 버튼 */}
+                            {item.purchaseUrl && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (item.purchaseUrl) {
+                                    window.open(item.purchaseUrl, '_blank');
+                                  }
+                                  setMobileSelectedItemId(null);
+                                }}
+                                className="w-full px-3 py-2 bg-white text-gray-800 rounded-lg text-xs font-medium hover:bg-gray-100 transition"
+                              >
+                                구매 링크 방문
+                              </button>
+                            )}
+                          </div>
+                        )}
+
+                        {isInSlot && mobileSelectedItemId !== item.id && (
                           <div className="absolute top-1 right-1 w-6 h-6 bg-[#5697B0] rounded-full flex items-center justify-center text-white text-xs">
                             ✓
                           </div>

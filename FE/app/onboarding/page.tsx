@@ -186,26 +186,23 @@ export default function OnboardingPage() {
         }
       `}</style>
 
-      {/* 메인 컨텐츠 */}
+      {/* 데스크톱 레이아웃 */}
       <div
         ref={containerRef}
-        className={`h-[660px] rounded-[10px] flex flex-col overflow-y-auto ${isAnimating ? 'onboarding-container' : 'w-[1000px]'}`}
-        style={{ backgroundColor: "rgba(86, 151, 176, 0.37)" }}
+        className={`hidden md:flex h-[660px] rounded-[10px] flex-col overflow-y-auto ${isAnimating ? 'onboarding-container' : 'w-[1000px]'} bg-white/85 backdrop-blur-xl shadow-2xl border border-white/40`}
       >
         <div className="p-8 flex flex-col h-full">
-          
+
           {/* 단계 표시 */}
           <div className="flex items-center justify-center mb-8">
             <div className="flex items-center gap-4">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                step === 1 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${step === 1 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
+                }`}>
                 1
               </div>
               <div className="w-12 h-0.5 bg-gray-300"></div>
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${
-                step === 2 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
-              }`}>
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold ${step === 2 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
+                }`}>
                 2
               </div>
             </div>
@@ -224,9 +221,8 @@ export default function OnboardingPage() {
 
                 {/* 선택 카운터 */}
                 <div className="text-center">
-                  <span className={`text-sm font-bold ${
-                    selectedTags.length >= 3 ? "text-[#5697B0]" : "text-gray-400"
-                  }`}>
+                  <span className={`text-sm font-bold ${selectedTags.length >= 3 ? "text-[#5697B0]" : "text-gray-400"
+                    }`}>
                     {selectedTags.length}
                   </span>
                   <span className="text-xs text-gray-500"> / 10개</span>
@@ -239,11 +235,10 @@ export default function OnboardingPage() {
                   <button
                     key={tag.id}
                     onClick={() => toggleTag(tag.id)}
-                    className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${
-                      selectedTags.includes(tag.id)
-                        ? "bg-[#5697B0]/20 text-[#2c5261] ring-2 ring-[#5697B0]"
-                        : "bg-white text-gray-600 border-2 border-gray-200 hover:border-[#5697B0]/50"
-                    }`}
+                    className={`px-6 py-3 rounded-full text-sm font-medium transition-all ${selectedTags.includes(tag.id)
+                      ? "bg-[#5697B0]/20 text-[#2c5261] ring-2 ring-[#5697B0]"
+                      : "bg-white text-gray-600 border-2 border-gray-200 hover:border-[#5697B0]/50"
+                      }`}
                   >
                     {tag.name}
                   </button>
@@ -274,9 +269,8 @@ export default function OnboardingPage() {
 
                 {/* 선택 카운터 */}
                 <div className="text-center">
-                  <span className={`text-sm font-bold ${
-                    selectedOutfits.length === 5 ? "text-[#5697B0]" : "text-gray-400"
-                  }`}>
+                  <span className={`text-sm font-bold ${selectedOutfits.length === 5 ? "text-[#5697B0]" : "text-gray-400"
+                    }`}>
                     {selectedOutfits.length}
                   </span>
                   <span className="text-xs text-gray-500"> / 5개</span>
@@ -301,7 +295,7 @@ export default function OnboardingPage() {
                     <button
                       key={outfit.id}
                       onClick={() => toggleOutfit(outfit.id)}
-                      className="relative flex-shrink-0 w-48 aspect-[3/4] rounded-lg overflow-hidden border-2 transition-all hover:scale-105"
+                      className="relative flex-shrink-0 w-48 aspect-[3/4] rounded-lg overflow-hidden border transition-all shadow-md hover:shadow-lg hover:scale-105"
                       style={{
                         borderColor: selectedOutfits.includes(outfit.id) ? "#5697B0" : "#e5e7eb"
                       }}
@@ -353,8 +347,137 @@ export default function OnboardingPage() {
             </div>
           )}
         </div>
+      </div>
+
+      {/* 모바일 레이아웃 */}
+      <div className="md:hidden absolute inset-0 flex flex-col justify-center px-6">
+        <div
+          className="w-full max-w-[340px] mx-auto animate-fadeIn flex-col rounded-[10px] max-h-[80vh] overflow-hidden flex bg-white/85 backdrop-blur-xl shadow-2xl border border-white/40"
+        >
+          <div className="p-6 flex flex-col flex-1 min-h-0">
+            {/* 단계 표시 (오리지널 스타일 복원) */}
+            <div className="flex items-center justify-center mb-6 flex-shrink-0">
+              <div className="flex items-center gap-3">
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step === 1 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
+                  }`}>
+                  1
+                </div>
+                <div className="w-8 h-0.5 bg-gray-300"></div>
+                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold ${step === 2 ? "bg-[#5697B0] text-white" : "bg-gray-200 text-gray-600"
+                  }`}>
+                  2
+                </div>
+              </div>
+            </div>
+
+            {step === 1 ? (
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex-shrink-0 mb-4 text-center">
+                  <h2 className="text-[18px] font-bold text-gray-900 mb-1">
+                    어떤 스타일을 선호하시나요?
+                  </h2>
+                  <p className="text-[11px] text-gray-600 mb-2">
+                    최소 3개, 최대 10개의 헤시테그를 골라주세요
+                  </p>
+                  <div className="text-center">
+                    <span className={`text-xs font-bold ${selectedTags.length >= 3 ? "text-[#5697B0]" : "text-gray-500"
+                      }`}>
+                      {selectedTags.length}
+                    </span>
+                    <span className="text-[10px] text-gray-500"> / 10개</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 flex flex-wrap gap-2 justify-center content-start overflow-y-auto pb-4 min-h-0">
+                  {tags.map((tag) => (
+                    <button
+                      key={tag.id}
+                      onClick={() => toggleTag(tag.id)}
+                      className={`px-3 py-1.5 rounded-full text-[11px] font-medium transition-all ${selectedTags.includes(tag.id)
+                        ? "bg-[#5697B0]/20 text-[#2c5261] ring-1 ring-[#5697B0]"
+                        : "bg-white text-gray-600 border border-gray-200"
+                        }`}
+                    >
+                      {tag.name}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleNext}
+                  disabled={selectedTags.length < 3}
+                  className="flex-shrink-0 w-full py-2.5 bg-[#5697B0] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 transition-all mt-2"
+                >
+                  다음 단계
+                </button>
+              </div>
+            ) : (
+              <div className="flex flex-col flex-1 min-h-0">
+                <div className="flex-shrink-0 mb-3 text-center">
+                  <h2 className="text-[18px] font-bold text-gray-900 mb-1">
+                    마음에 드는 코디를 골라보세요
+                  </h2>
+                  <p className="text-[11px] text-gray-600 mb-2">
+                    5개의 코디를 선택해주세요
+                  </p>
+                  <div className="text-center">
+                    <span className={`text-xs font-bold ${selectedOutfits.length === 5 ? "text-[#5697B0]" : "text-gray-500"
+                      }`}>
+                      {selectedOutfits.length}
+                    </span>
+                    <span className="text-[10px] text-gray-500"> / 5개</span>
+                  </div>
+                </div>
+
+                <div className="flex-1 overflow-y-auto min-h-0 -mx-2 px-2">
+                  <div className="grid grid-cols-2 gap-2 pb-2">
+                    {outfits.map((outfit) => (
+                      <button
+                        key={outfit.id}
+                        onClick={() => toggleOutfit(outfit.id)}
+                        className="relative w-full aspect-[3/4] rounded-lg overflow-hidden border transition-all shadow-md hover:shadow-lg"
+                        style={{
+                          borderColor: selectedOutfits.includes(outfit.id) ? "#5697B0" : "#e5e7eb"
+                        }}
+                      >
+                        <img
+                          src={outfit.imageUrl}
+                          alt={`코디 ${outfit.id}`}
+                          className="w-full h-full object-cover"
+                        />
+                        {selectedOutfits.includes(outfit.id) && (
+                          <div className="absolute inset-0 bg-[#5697B0]/20 flex items-center justify-center">
+                            <div className="w-8 h-8 bg-[#5697B0] rounded-full flex items-center justify-center">
+                              <span className="text-white text-sm">✓</span>
+                            </div>
+                          </div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex-shrink-0 flex gap-2 mt-3">
+                  <button
+                    onClick={handleBack}
+                    className="flex-1 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition-all"
+                  >
+                    이전
+                  </button>
+                  <button
+                    onClick={handleSubmit}
+                    disabled={selectedOutfits.length !== 5 || submitting}
+                    className="flex-1 py-2 bg-[#5697B0] text-white rounded-lg text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all"
+                  >
+                    {submitting ? "저장 중..." : "완료"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
-    
+    </div>
+
   );
 }
