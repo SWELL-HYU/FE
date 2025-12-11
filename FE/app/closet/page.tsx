@@ -6,6 +6,7 @@ import { getClosetItems, deleteClosetItem } from "@/lib/closet";
 import { uploadProfilePhoto } from "@/lib/profile";
 import { getMe } from "@/lib/auth";
 import { startFitting, pollFittingStatus, getFittingHistory } from "@/lib/fitting";
+import { API_BASE_URL } from "@/lib/api";
 import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import type { ClosetItem } from "@/lib/closet";
 import type { FittingCategory } from "@/lib/fitting";
@@ -81,7 +82,7 @@ export default function ClosetPage() {
         // 백엔드 URL을 절대 경로로 변환
         const fullPhotoUrl = res.data.user.profileImageUrl.startsWith("http")
           ? res.data.user.profileImageUrl
-          : `http://localhost:8000${res.data.user.profileImageUrl}`;
+          : `${API_BASE_URL}${res.data.user.profileImageUrl}`;
         setUserPhoto(fullPhotoUrl);
       }
     });
@@ -227,7 +228,7 @@ export default function ClosetPage() {
       // 백엔드 URL을 절대 경로로 변환
       const fullPhotoUrl = response.data.photoUrl.startsWith("http")
         ? response.data.photoUrl
-        : `http://localhost:8000${response.data.photoUrl}`;
+        : `${API_BASE_URL}${response.data.photoUrl}`;
 
       console.log("🌐 전체 URL:", fullPhotoUrl);
 

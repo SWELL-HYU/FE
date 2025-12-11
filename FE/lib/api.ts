@@ -1,8 +1,11 @@
 import axios from "axios";
 
+// API Base URL from environment variable
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000";
+
 // API 기본 설정
 const api = axios.create({
-  baseURL: "http://localhost:8000/api",
+  baseURL: `${API_BASE_URL}/api`,
   headers: {
     "Content-Type": "application/json",
   },
