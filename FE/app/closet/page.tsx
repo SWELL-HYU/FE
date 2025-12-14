@@ -464,7 +464,7 @@ export default function ClosetPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
       {/* 상단 네비게이션 */}
       <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
         {/* 모바일: Swell 로고 / 데스크톱: ← Main + 페이지 제목 */}
@@ -838,8 +838,8 @@ export default function ClosetPage() {
         {/* 피팅 탭 */}
         {activeTab === 'fitting' && (
           <div className="flex-1 flex flex-col p-4 overflow-auto">
-            {/* 사진 영역 - 더 크게 */}
-            <div className="aspect-[3/4] bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3">
+            {/* 사진 영역 - 화면 비율에 맞춰 유동적으로 조절 */}
+            <div className="flex-1 min-h-[300px] bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3">
               {fittingStatus === "processing" ? (
                 <div className="h-full flex flex-col items-center justify-center p-8">
                   <video
@@ -912,8 +912,8 @@ export default function ClosetPage() {
               />
             </div>
 
-            {/* 옷걸이 슬롯 (가로 3개) - 더 작게 */}
-            <div className="flex gap-2 mb-3">
+            {/* 옷걸이 슬롯 (가로 3개) - 크기 고정 */}
+            <div className="flex gap-2 mb-3 shrink-0 h-24">
               {(["상의", "하의", "아우터"] as const).map((slotCategory) => (
                 <div
                   key={slotCategory}
@@ -957,8 +957,8 @@ export default function ClosetPage() {
               ))}
             </div>
 
-            {/* 버튼 영역 */}
-            <div className="flex gap-2">
+            {/* 버튼 영역 - 크기 고정 */}
+            <div className="flex gap-2 shrink-0">
               {userPhoto && (
                 <button
                   onClick={() => fileInputRef.current?.click()}
