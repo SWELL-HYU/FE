@@ -464,9 +464,9 @@ export default function ClosetPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
       {/* 상단 네비게이션 */}
-      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
+      <nav className="bg-transparent px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center flex-shrink-0 w-full">
         {/* 모바일: Swell 로고 / 데스크톱: ← Main + 페이지 제목 */}
         <div className="flex items-center gap-4">
           {/* 데스크톱 전용 */}
@@ -577,7 +577,7 @@ export default function ClosetPage() {
 
                   {/* LLM 메시지 */}
                   {llmMessage && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/20">
+                    <div className="absolute bottom-4 left-4 right-4 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/20 animate-fadeIn">
                       <p className="text-black text-sm leading-relaxed font-medium">
                         💬 {llmMessage}
                       </p>
@@ -812,7 +812,7 @@ export default function ClosetPage() {
       </div>
 
       {/* 모바일: 탭 기반 레이아웃 */}
-      <div className="md:hidden flex-1 flex flex-col overflow-hidden pb-14">
+      <div className="md:hidden flex-1 flex flex-col overflow-hidden pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
         {/* 탭 헤더 */}
         <div className="flex border-b border-gray-200 bg-transparent backdrop-blur-sm flex-shrink-0">
           <button
@@ -876,13 +876,7 @@ export default function ClosetPage() {
                   >
                     다시 피팅
                   </button>
-                  {llmMessage && (
-                    <div className="absolute bottom-3 left-3 right-3 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-3 shadow-xl border border-white/20">
-                      <p className="text-black text-xs leading-relaxed font-medium">
-                        💬 {llmMessage}
-                      </p>
-                    </div>
-                  )}
+
                 </div>
               ) : userPhoto ? (
                 <div className="relative w-full">
@@ -911,6 +905,15 @@ export default function ClosetPage() {
                 className="hidden"
               />
             </div>
+
+            {/* LLM 메시지 (모바일: 이미지 하단으로 이동 - 잘림 방지) */}
+            {fittingResult && llmMessage && (
+              <div className="bg-[#B7C9E2] rounded-xl p-4 shadow-md border border-white/20 mb-3 animate-fadeIn">
+                <p className="text-gray-800 text-sm leading-relaxed font-medium">
+                  💬 {llmMessage}
+                </p>
+              </div>
+            )}
 
             {/* 옷걸이 슬롯 (가로 3개) - 더 작게 */}
             <div className="flex gap-2 mb-3">
