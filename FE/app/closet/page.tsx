@@ -7,7 +7,7 @@ import { uploadProfilePhoto } from "@/lib/profile";
 import { getMe, logout } from "@/lib/auth";
 import { startFitting, pollFittingStatus, getFittingHistory } from "@/lib/fitting";
 import { API_BASE_URL } from "@/lib/api";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
 import ItemSelector from "@/components/closet/ItemSelector";
 import ProgressBar from "@/components/common/ProgressBar";
 import type { ClosetItem } from "@/lib/closet";
@@ -1094,9 +1094,7 @@ export default function ClosetPage() {
         )}
       </div>
 
-      {/* 모바일 하단 네비게이션 바 */}
-      {/* 모바일 하단 네비게이션 */}
-      <MobileBottomNav />
+
 
       {/* 아이템 선택 모달 (전역 배치) */}
       <ItemSelector

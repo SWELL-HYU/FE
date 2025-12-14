@@ -1,6 +1,7 @@
 // app/layout.tsx
 import type { Metadata, Viewport } from "next";
 import { Outfit, Manrope, Noto_Sans_KR } from "next/font/google";
+import MobileBottomNav from "@/components/layout/MobileBottomNav";
 import "./globals.css";
 
 // Outfit (제목/로고/영문 강조용)
@@ -49,6 +50,7 @@ export default function RootLayout({
     >
       <body className={manrope.className}>
         {children}
+        <MobileBottomNav />
       </body>
     </html>
   );

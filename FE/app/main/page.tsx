@@ -8,7 +8,7 @@ import { getRecommendations, addFavorite, removeFavorite, recordViewLog, skipOut
 import { saveClosetItem } from "@/lib/closet";
 import { logout, getMe } from "@/lib/auth";
 import HeartIcon from "@/components/common/HeartIcon";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
 import type { Outfit } from "@/types/api";
 
 export default function MainPage() {
@@ -783,7 +783,7 @@ export default function MainPage() {
       </button>
 
       {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
 
       {/* 모바일 하단 시트 (상품 목록) */}
       <AnimatePresence>

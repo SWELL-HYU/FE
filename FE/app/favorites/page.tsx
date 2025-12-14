@@ -6,7 +6,7 @@ import { getFavorites, removeFavorite } from "@/lib/outfits";
 import { saveClosetItem } from "@/lib/closet";
 import { logout, getMe } from "@/lib/auth";
 import HeartIcon from "@/components/common/HeartIcon";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
 import type { Outfit } from "@/types/api";
 
 export default function FavoritesPage() {
@@ -427,8 +427,7 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
     </div>
   );
 }

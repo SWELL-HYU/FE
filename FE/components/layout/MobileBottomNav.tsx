@@ -9,6 +9,12 @@ export default function MobileBottomNav() {
   const router = useRouter();
   const pathname = usePathname();
 
+  // 하단 네비게이션이 보여질 경로 목록
+  const visiblePaths = ["/main", "/closet", "/favorites"];
+  const isVisible = pathname && visiblePaths.some((path) => pathname.startsWith(path));
+
+  if (!isVisible) return null;
+
   const navItems = [
     {
       path: "/closet",
