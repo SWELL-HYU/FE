@@ -839,9 +839,9 @@ export default function ClosetPage() {
         {activeTab === 'fitting' && (
           <div className="flex-1 flex flex-col p-4 overflow-auto">
             {/* 사진 영역 - 더 크게 */}
-            <div className="aspect-[3/4] bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3 min-h-[400px]">
               {fittingStatus === "processing" ? (
-                <div className="h-full flex flex-col items-center justify-center p-8">
+                <div className="h-full flex flex-col items-center justify-center p-8 min-h-[400px]">
                   <video
                     src="/videos/logo_animation.mp4"
                     autoPlay
@@ -860,11 +860,11 @@ export default function ClosetPage() {
                   </p>
                 </div>
               ) : fittingResult ? (
-                <div className="h-full relative">
+                <div className="relative w-full">
                   <img
                     src={fittingResult}
                     alt="피팅 결과"
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto object-contain max-h-[70vh]"
                   />
                   <button
                     onClick={() => {
@@ -885,16 +885,16 @@ export default function ClosetPage() {
                   )}
                 </div>
               ) : userPhoto ? (
-                <div className="h-full relative">
+                <div className="relative w-full">
                   <img
                     src={userPhoto}
                     alt="내 사진"
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto object-contain max-h-[70vh]"
                   />
                 </div>
               ) : (
                 <div
-                  className="h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition"
+                  className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition min-h-[400px]"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="text-5xl mb-3">📷</div>
