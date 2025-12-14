@@ -426,11 +426,14 @@ export default function MainPage() {
     }
 
     try {
+      await saveClosetItem(itemId);
       setSavedItems([...savedItems, itemId]);
       alert("✅ 옷장에 저장되었습니다!");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
-      alert(errorMessage);
+      console.error("옷장 저장 실패:", err);
+      // const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
+      // alert(errorMessage);
+      alert("저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -798,29 +801,31 @@ export default function MainPage() {
 
             {/* 하단 시트 */}
             <motion.div
-              {...bottomSheetSwipeHandlers}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[75vh] flex flex-col"
             >
-              {/* 핸들 */}
-              <div className="flex justify-center py-3 border-b border-gray-100">
-                <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-              </div>
-
-              {/* 상품 목록 헤더 */}
-              {currentOutfit && (
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span>Items</span>
-                    <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {currentOutfit.items.length}
-                    </span>
-                  </h2>
+              {/* 스와이프 영역 (헤더만) */}
+              <div {...bottomSheetSwipeHandlers}>
+                {/* 핸들 */}
+                <div className="flex justify-center py-3 border-b border-gray-100">
+                  <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
                 </div>
-              )}
+
+                {/* 상품 목록 헤더 */}
+                {currentOutfit && (
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                      <span>Items</span>
+                      <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {currentOutfit.items.length}
+                      </span>
+                    </h2>
+                  </div>
+                )}
+              </div>
 
               {/* 상품 목록 */}
               {currentOutfit && (
