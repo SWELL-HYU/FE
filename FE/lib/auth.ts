@@ -38,10 +38,11 @@ export const login = async (data: LoginRequest) => {
     }>
   >("/auth/login", data);
 
-  // 로그인 성공 시 토큰 저장
+  // 로그인 성공 시 토큰 및 사용자 정보 저장
   if (response.data.success && response.data.data.token) {
     if (typeof window !== "undefined") {
       sessionStorage.setItem("token", response.data.data.token);
+      sessionStorage.setItem("userName", response.data.data.user.name);
     }
   }
 
@@ -61,10 +62,11 @@ export const logout = async () => {
     }>
   >("/auth/logout");
 
-  // 로그아웃 성공 시 토큰 삭제
+  // 로그아웃 성공 시 토큰 및 사용자 정보 삭제
   if (response.data.success) {
     if (typeof window !== "undefined") {
       sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userName");
     }
   }
 

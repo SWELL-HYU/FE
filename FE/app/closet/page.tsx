@@ -4,10 +4,12 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getClosetItems, deleteClosetItem } from "@/lib/closet";
 import { uploadProfilePhoto } from "@/lib/profile";
-import { getMe } from "@/lib/auth";
+import { getMe, logout } from "@/lib/auth";
 import { startFitting, pollFittingStatus, getFittingHistory } from "@/lib/fitting";
 import { API_BASE_URL } from "@/lib/api";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
+import ItemSelector from "@/components/closet/ItemSelector";
+import ProgressBar from "@/components/common/ProgressBar";
 import type { ClosetItem } from "@/lib/closet";
 import type { FittingCategory } from "@/lib/fitting";
 
@@ -50,7 +52,41 @@ export default function ClosetPage() {
   const [fittingResult, setFittingResult] = useState<string | null>(null);
   const [fittingStatus, setFittingStatus] = useState<"idle" | "processing" | "completed">("idle");
   const [fittingProgress, setFittingProgress] = useState<string>("");
+  const [progressValue, setProgressValue] = useState(0); // 0~100
+  const [estimatedSeconds, setEstimatedSeconds] = useState<number>(0); // 예상 소요 시간 (초)
   const [llmMessage, setLlmMessage] = useState<string | null>(null);
+
+  // Fake Progress Bar Logic
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+
+    if (fittingStatus === "processing") {
+      setProgressValue(0);
+
+      // 예상 시간이 설정되지 않았으면 기본값 30초 (혹은 아이템 개수 기반 추정 불가 시)
+      const duration = estimatedSeconds > 0 ? estimatedSeconds : 45;
+
+      // 100ms마다 업데이트
+      const updateInterval = 100;
+      const totalSteps = (duration * 1000) / updateInterval;
+      const increment = 90 / totalSteps; // 90%까지 도달
+
+      let p = 0;
+      interval = setInterval(() => {
+        p += increment;
+        if (p > 90) p = 90; // 최대 90%에서 대기
+        setProgressValue(p);
+      }, updateInterval);
+
+    } else if (fittingStatus === "completed") {
+      setProgressValue(100);
+    } else {
+      setProgressValue(0);
+      setEstimatedSeconds(0);
+    }
+
+    return () => clearInterval(interval);
+  }, [fittingStatus, estimatedSeconds]);
 
   // UI 상태
   const [showDropdown, setShowDropdown] = useState(false);
@@ -63,6 +99,33 @@ export default function ClosetPage() {
   // 모바일 아이템 오버레이 상태
   const [mobileSelectedItemId, setMobileSelectedItemId] = useState<number | null>(null);
 
+  // 아이템 선택 모달 상태
+  const [isSelectorOpen, setIsSelectorOpen] = useState(false);
+  const [activeSlot, setActiveSlot] = useState<"상의" | "하의" | "아우터" | null>(null);
+
+  const handleSlotClick = (slot: "상의" | "하의" | "아우터") => {
+    setActiveSlot(slot);
+    setIsSelectorOpen(true);
+  };
+
+  const handleSelectorSelect = (item: ClosetItem) => {
+    if (!activeSlot) return;
+
+    setFittingSlots(prev => ({
+      ...prev,
+      [activeSlot]: item.id
+    }));
+
+    // 피팅 완료 상태였다면 초기화 (바로 '피팅 확인하기' 활성화)
+    if (fittingStatus === "completed") {
+      setFittingStatus("idle");
+      setFittingResult(null);
+      setLlmMessage(null);
+    }
+
+    setIsSelectorOpen(false);
+  };
+
   // 초기화
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -74,10 +137,26 @@ export default function ClosetPage() {
     const storedName = sessionStorage.getItem("userName");
     if (storedName) setUserName(storedName);
 
+    // 0. 로컬 저장소에서 선택된 아이템 복원 (우선순위 낮음 - 실제 피팅 상태가 있으면 덮어씌워짐)
+    const savedSlots = sessionStorage.getItem("fittingSlots");
+    if (savedSlots) {
+      try {
+        setFittingSlots(JSON.parse(savedSlots));
+      } catch (e) {
+        console.error("Failed to parse saved fitting slots", e);
+      }
+    }
+
     loadClosetItems();
 
-    // 1. 프로필 사진 복원
+    // 1. 프로필 사진 및 사용자 이름 복원
     getMe().then((res) => {
+      // 사용자 이름 업데이트 (세션에 없었을 경우 대비)
+      if (res.data.user.name) {
+        setUserName(res.data.user.name);
+        sessionStorage.setItem("userName", res.data.user.name);
+      }
+
       if (res.data.user.profileImageUrl) {
         // 백엔드 URL을 절대 경로로 변환
         const fullPhotoUrl = res.data.user.profileImageUrl.startsWith("http")
@@ -93,6 +172,11 @@ export default function ClosetPage() {
     setLoading(false);
   }, [router]);
 
+  // 피팅 아이템 변경 시 저장
+  useEffect(() => {
+    sessionStorage.setItem("fittingSlots", JSON.stringify(fittingSlots));
+  }, [fittingSlots]);
+
   // 가상 피팅 상태 복원 함수
   const restoreFittingStatus = async () => {
     try {
@@ -106,6 +190,23 @@ export default function ClosetPage() {
         // 진행 중이면 상태 설정 후 폴링 시작
         setFittingStatus("processing");
         setFittingProgress("이전 작업을 계속 진행 중입니다...");
+
+        // 진행 중인 아이템 슬롯에 복원
+        if (latestFitting.items && latestFitting.items.length > 0) {
+          const restoredSlots = { ...fittingSlots };
+          latestFitting.items.forEach(item => {
+            // item.category는 'top', 'bottom', 'outer' 형태이므로 한글로 변환
+            const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
+            if (koreanCategory) {
+              restoredSlots[koreanCategory as "상의" | "하의" | "아우터"] = item.itemId;
+            }
+          });
+          setFittingSlots(restoredSlots);
+
+          // 복원 시 예상 시간 설정
+          const count = latestFitting.items.length;
+          setEstimatedSeconds(count * 15);
+        }
 
         // 폴링 재개
         pollFittingStatus(latestFitting.jobId)
@@ -129,6 +230,19 @@ export default function ClosetPage() {
       } else if (latestFitting.status === "completed") {
         // 완료된 상태면 결과 표시
         setFittingResult(latestFitting.resultImageUrl);
+
+        // 완료된 아이템 슬롯에 복원 (선택사항: 완료된 결과의 아이템을 보여줄지 여부)
+        // 사용자가 "다시 피팅"을 누르기 전까지는 완료된 피팅의 아이템을 보여주는 것이 자연스러움
+        if (latestFitting.items && latestFitting.items.length > 0) {
+          const restoredSlots = { ...fittingSlots };
+          latestFitting.items.forEach(item => {
+            const koreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
+            if (koreanCategory) {
+              restoredSlots[koreanCategory as "상의" | "하의" | "아우터"] = item.itemId;
+            }
+          });
+          setFittingSlots(restoredSlots);
+        }
         // LLM 메시지는 history에 없으므로 (FittingHistoryItem 정의 확인 필요) 
         // 상세 조회 API를 호출하거나, history에 포함되어 있다면 사용.
         // 현재 FittingHistoryItem에는 llmMessage가 없으므로 상세 조회 필요할 수 있음.
@@ -172,9 +286,10 @@ export default function ClosetPage() {
     try {
       const response = await getClosetItems({ category: "all", limit: 50 });
       setClosetItems(response.data.items);
-    } catch (err: any) {
-      console.error("옷장 로딩 실패:", err);
-      console.error("에러 메시지:", err.response?.data?.error?.message);
+    } catch (err) {
+      const error = err as any;
+      console.error("옷장 로딩 실패:", error);
+      console.error("에러 메시지:", error.response?.data?.error?.message);
     }
   };
 
@@ -206,6 +321,13 @@ export default function ClosetPage() {
       ...prev,
       [slotCategory]: null
     }));
+
+    // 피팅 완료 상태였다면 초기화
+    if (fittingStatus === "completed") {
+      setFittingStatus("idle");
+      setFittingResult(null);
+      setLlmMessage(null);
+    }
   };
 
   // 슬롯의 아이템 정보 가져오기
@@ -236,14 +358,15 @@ export default function ClosetPage() {
       setFittingResult(null);
       setFittingStatus("idle");
       alert("사진이 업로드되었습니다!");
-    } catch (err: any) {
-      console.error("❌ 업로드 에러 전체:", err);
-      console.error("❌ 에러 메시지:", err.message);
-      console.error("❌ 에러 코드:", err.code);
-      console.error("❌ 응답 데이터:", err.response?.data);
-      console.error("❌ 응답 상태:", err.response?.status);
+    } catch (err) {
+      const error = err as any;
+      console.error("❌ 업로드 에러 전체:", error);
+      console.error("❌ 에러 메시지:", error.message);
+      console.error("❌ 에러 코드:", error.code);
+      console.error("❌ 응답 데이터:", error.response?.data);
+      console.error("❌ 응답 상태:", error.response?.status);
 
-      const errorMessage = err.response?.data?.error?.message || err.message || "사진 업로드 실패";
+      const errorMessage = error.response?.data?.error?.message || error.message || "사진 업로드 실패";
       alert(`업로드 실패: ${errorMessage}`);
     }
   };
@@ -261,6 +384,11 @@ export default function ClosetPage() {
       alert("최소 1개 이상의 아이템을 선택해주세요");
       return;
     }
+
+    const selectedCount = selectedItems.length;
+    // 아이템당 약 15초 소요 예상
+    const estimated = selectedCount * 15;
+    setEstimatedSeconds(estimated);
 
     setFittingStatus("processing");
     setFittingProgress("피팅 시작 중...");
@@ -295,19 +423,30 @@ export default function ClosetPage() {
         setFittingStatus("idle");
         setFittingProgress("");
       }
-    } catch (err: any) {
-      console.error("피팅 실패:", err);
-      alert(err.response?.data?.error?.message || "피팅 요청 실패");
+    } catch (err) {
+      const error = err as any;
+      console.error("피팅 실패:", error);
+      alert(error.response?.data?.error?.message || "피팅 요청 실패");
       setFittingStatus("idle");
       setFittingProgress("");
     }
   };
 
   // 로그아웃
-  const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("userName");
-    router.push("/start");
+
+  const handleLogout = async () => {
+    try {
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("userName");
+      sessionStorage.removeItem("fittingSlots");
+      sessionStorage.removeItem("mainPageNavigating");
+      localStorage.removeItem("mainPageToken"); // Also clear explicit token if possible
+
+      await logout(); // Call API logout
+      router.push("/start");
+    } catch (_err) {
+      router.push("/start");
+    }
   };
 
   // 피팅 가능 여부 (사진 있고, 아이템 1개 이상 선택되고, 완료 상태가 아닐 때)
@@ -325,9 +464,9 @@ export default function ClosetPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
       {/* 상단 네비게이션 */}
-      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0 w-full">
+      <nav className="bg-transparent px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center flex-shrink-0 w-full">
         {/* 모바일: Swell 로고 / 데스크톱: ← Main + 페이지 제목 */}
         <div className="flex items-center gap-4">
           {/* 데스크톱 전용 */}
@@ -408,8 +547,14 @@ export default function ClosetPage() {
                     playsInline
                     className="w-64 h-64 object-contain mb-4"
                   />
+                  <div className="w-full px-8 mb-2">
+                    <ProgressBar progress={progressValue} />
+                  </div>
                   <p className="text-gray-600 text-center font-medium">{fittingProgress}</p>
-                  <p className="text-sm text-gray-400 mt-2">잠시만 기다려주세요...</p>
+                  <p className="text-sm text-gray-400 mt-2">
+                    잠시만 기다려주세요...
+                    {estimatedSeconds > 0 && `(약 ${estimatedSeconds}초 소요 예정)`}
+                  </p>
                 </div>
               ) : fittingResult ? (
                 // 피팅 결과
@@ -432,7 +577,7 @@ export default function ClosetPage() {
 
                   {/* LLM 메시지 */}
                   {llmMessage && (
-                    <div className="absolute bottom-4 left-4 right-4 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/20">
+                    <div className="absolute bottom-4 left-4 right-4 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-4 shadow-xl border border-white/20 animate-fadeIn">
                       <p className="text-black text-sm leading-relaxed font-medium">
                         💬 {llmMessage}
                       </p>
@@ -596,8 +741,9 @@ export default function ClosetPage() {
                                 await deleteClosetItem(item.id);
                                 await loadClosetItems();
                                 alert('삭제되었습니다');
-                              } catch (err: any) {
-                                alert(err.response?.data?.error?.message || '삭제 실패');
+                              } catch (err) {
+                                const error = err as any;
+                                alert(error.response?.data?.error?.message || '삭제 실패');
                               }
                             }
                           }}
@@ -666,7 +812,7 @@ export default function ClosetPage() {
       </div>
 
       {/* 모바일: 탭 기반 레이아웃 */}
-      <div className="md:hidden flex-1 flex flex-col overflow-hidden pb-14">
+      <div className="md:hidden flex-1 flex flex-col overflow-hidden pb-[calc(3.5rem+env(safe-area-inset-bottom))]">
         {/* 탭 헤더 */}
         <div className="flex border-b border-gray-200 bg-transparent backdrop-blur-sm flex-shrink-0">
           <button
@@ -693,9 +839,9 @@ export default function ClosetPage() {
         {activeTab === 'fitting' && (
           <div className="flex-1 flex flex-col p-4 overflow-auto">
             {/* 사진 영역 - 더 크게 */}
-            <div className="aspect-[3/4] bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3">
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden relative mb-3 min-h-[400px]">
               {fittingStatus === "processing" ? (
-                <div className="h-full flex flex-col items-center justify-center p-8">
+                <div className="h-full flex flex-col items-center justify-center p-8 min-h-[400px]">
                   <video
                     src="/videos/logo_animation.mp4"
                     autoPlay
@@ -704,15 +850,21 @@ export default function ClosetPage() {
                     playsInline
                     className="w-32 h-32 object-contain mb-4"
                   />
+                  <div className="w-full px-8 mb-2">
+                    <ProgressBar progress={progressValue} />
+                  </div>
                   <p className="text-gray-600 text-center font-medium text-sm">{fittingProgress}</p>
-                  <p className="text-xs text-gray-400 mt-2">잠시만 기다려주세요...</p>
+                  <p className="text-xs text-gray-400 mt-2">
+                    잠시만 기다려주세요...
+                    {estimatedSeconds > 0 && `(약 ${estimatedSeconds}초 소요 예정)`}
+                  </p>
                 </div>
               ) : fittingResult ? (
-                <div className="h-full relative">
+                <div className="relative w-full">
                   <img
                     src={fittingResult}
                     alt="피팅 결과"
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto object-contain max-h-[70vh]"
                   />
                   <button
                     onClick={() => {
@@ -724,25 +876,19 @@ export default function ClosetPage() {
                   >
                     다시 피팅
                   </button>
-                  {llmMessage && (
-                    <div className="absolute bottom-3 left-3 right-3 bg-[#B7C9E2]/80 backdrop-blur-sm rounded-xl p-3 shadow-xl border border-white/20">
-                      <p className="text-black text-xs leading-relaxed font-medium">
-                        💬 {llmMessage}
-                      </p>
-                    </div>
-                  )}
+
                 </div>
               ) : userPhoto ? (
-                <div className="h-full relative">
+                <div className="relative w-full">
                   <img
                     src={userPhoto}
                     alt="내 사진"
-                    className="w-full h-full object-contain"
+                    className="w-full h-auto object-contain max-h-[70vh]"
                   />
                 </div>
               ) : (
                 <div
-                  className="h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition"
+                  className="flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition min-h-[400px]"
                   onClick={() => fileInputRef.current?.click()}
                 >
                   <div className="text-5xl mb-3">📷</div>
@@ -760,12 +906,22 @@ export default function ClosetPage() {
               />
             </div>
 
+            {/* LLM 메시지 (모바일: 이미지 하단으로 이동 - 잘림 방지) */}
+            {fittingResult && llmMessage && (
+              <div className="bg-[#B7C9E2] rounded-xl p-4 shadow-md border border-white/20 mb-3 animate-fadeIn">
+                <p className="text-gray-800 text-sm leading-relaxed font-medium">
+                  💬 {llmMessage}
+                </p>
+              </div>
+            )}
+
             {/* 옷걸이 슬롯 (가로 3개) - 더 작게 */}
             <div className="flex gap-2 mb-3">
               {(["상의", "하의", "아우터"] as const).map((slotCategory) => (
                 <div
                   key={slotCategory}
-                  className="flex-1 bg-white rounded-lg shadow border border-dashed border-gray-300 p-1.5 relative"
+                  onClick={() => handleSlotClick(slotCategory)}
+                  className="flex-1 bg-white rounded-lg shadow border border-dashed border-gray-300 p-1.5 relative cursor-pointer active:scale-95 transition-transform"
                 >
                   <p className="text-[9px] text-gray-400 text-center mb-0.5">{slotCategory}</p>
                   {getSlotItem(slotCategory) ? (
@@ -786,7 +942,10 @@ export default function ClosetPage() {
                         )}
                       </div>
                       <button
-                        onClick={() => handleRemoveFromSlot(slotCategory)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleRemoveFromSlot(slotCategory);
+                        }}
                         className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full text-xs flex items-center justify-center hover:bg-red-600 transition shadow-md"
                       >
                         ✕
@@ -819,6 +978,8 @@ export default function ClosetPage() {
                 {fittingStatus === "processing" ? "피팅 중..." : "피팅 확인하기"}
               </button>
             </div>
+
+            {/* 아이템 선택 모달 - 이동됨 */}
           </div>
         )}
 
@@ -936,8 +1097,20 @@ export default function ClosetPage() {
         )}
       </div>
 
-      {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
+
+      {/* 아이템 선택 모달 (전역 배치) */}
+      <ItemSelector
+        isOpen={isSelectorOpen}
+        onClose={() => setIsSelectorOpen(false)}
+        category={activeSlot || ""}
+        items={closetItems.filter(item => {
+          if (!activeSlot) return false;
+          const itemKoreanCategory = CATEGORY_MAP_REVERSE[item.category as FittingCategory];
+          return itemKoreanCategory === activeSlot;
+        })}
+        onSelect={handleSelectorSelect}
+      />
     </div>
   );
 }

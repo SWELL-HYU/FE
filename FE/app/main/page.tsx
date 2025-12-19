@@ -6,14 +6,14 @@ import { useSwipeable } from "react-swipeable";
 import { motion, AnimatePresence } from "framer-motion";
 import { getRecommendations, addFavorite, removeFavorite, recordViewLog, skipOutfit } from "@/lib/outfits";
 import { saveClosetItem } from "@/lib/closet";
-import { logout } from "@/lib/auth";
+import { logout, getMe } from "@/lib/auth";
 import HeartIcon from "@/components/common/HeartIcon";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
-import type { Outfit, Season, Style } from "@/types/api";
+
+import type { Outfit } from "@/types/api";
 
 export default function MainPage() {
   const router = useRouter();
-  
+
   // 상태 관리
   const [allOutfits, setAllOutfits] = useState<Outfit[]>([]); // 전체 추천 코디
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -37,7 +37,7 @@ export default function MainPage() {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
 
   // 스와이프 방향 애니메이션
-  const [swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
+  const [_swipeDirection, setSwipeDirection] = useState<"left" | "right" | null>(null);
 
   // 더블 탭 감지
   const lastTapRef = useRef<number>(0);
@@ -90,6 +90,16 @@ export default function MainPage() {
     const storedName = sessionStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
+    } else {
+      // 세션 스토리지에 이름이 없으면 API로 조회
+      getMe().then((response) => {
+        if (response.success && response.data.user) {
+          setUserName(response.data.user.name);
+          sessionStorage.setItem("userName", response.data.user.name);
+        }
+      }).catch((err) => {
+        console.error("사용자 정보 조회 실패:", err);
+      });
     }
   }, [router]);
 
@@ -101,14 +111,16 @@ export default function MainPage() {
     try {
       // 새로고침 감지: sessionStorage 플래그 확인
       const isNavigating = sessionStorage.getItem("mainPageNavigating");
+      const currentToken = sessionStorage.getItem("token");
 
       // 로컬 스토리지에서 저장된 상태 확인
       const savedOutfitsStr = localStorage.getItem("mainPageOutfits");
       const savedOutfitId = localStorage.getItem("mainPageCurrentOutfitId");
       const savedPage = localStorage.getItem("mainPageCurrentPage");
+      const savedToken = localStorage.getItem("mainPageToken");
 
-      // 페이지 이동(네비게이션)인 경우에만 저장된 상태 복원
-      if (isNavigating && savedOutfitsStr && savedOutfitId) {
+      // 페이지 이동(네비게이션)이고 토큰이 일치하는 경우에만 저장된 상태 복원
+      if (isNavigating && savedOutfitsStr && savedOutfitId && savedToken === currentToken) {
         // 저장된 코디 목록 복원
         const savedOutfits = JSON.parse(savedOutfitsStr);
         setAllOutfits(savedOutfits);
@@ -116,11 +128,9 @@ export default function MainPage() {
 
         // 저장된 코디 ID로 인덱스 찾기
         const outfitId = parseInt(savedOutfitId, 10);
-        const foundIndex = savedOutfits.findIndex((outfit: any) => outfit.id === outfitId);
+        const foundIndex = savedOutfits.findIndex((outfit: Outfit) => outfit.id === outfitId);
 
         console.log("복원 시도: 저장된 ID =", outfitId, "찾은 인덱스 =", foundIndex);
-        console.log("전체 코디 수:", savedOutfits.length);
-        console.log("첫 3개 코디 ID:", savedOutfits.slice(0, 3).map((o: any) => o.id));
 
         if (foundIndex !== -1) {
           setCurrentIndex(foundIndex);
@@ -133,8 +143,14 @@ export default function MainPage() {
         setViewStartTime(Date.now());
         setLoading(false);
       } else {
-        // 새로고침이거나 저장된 데이터가 없는 경우 → 새로운 추천 받기
-        console.log(isNavigating ? "저장된 데이터 없음: 새로운 추천 요청" : "🔄 새로고침 감지: 새로운 추천 요청");
+        // 새로고침이거나 저장된 데이터가 없거나 토큰이 다른 경우 → 새로운 추천 받기
+        console.log(isNavigating ? "저장된 데이터 없음/만료: 새로운 추천 요청" : "🔄 새로고침 감지: 새로운 추천 요청");
+
+        // 이전 사용자 데이터 클리어
+        localStorage.removeItem("mainPageOutfits");
+        localStorage.removeItem("mainPageCurrentOutfitId");
+        localStorage.removeItem("mainPageCurrentPage");
+        localStorage.removeItem("mainPageToken");
 
         const response = await getRecommendations({
           page: 1,
@@ -146,16 +162,19 @@ export default function MainPage() {
         setCurrentPage(1);
         setViewStartTime(Date.now());
 
-        // 로컬 스토리지에 저장
+        // 로컬 스토리지에 저장 (토큰 포함)
         localStorage.setItem("mainPageOutfits", JSON.stringify(response.data.outfits));
         localStorage.setItem("mainPageCurrentPage", "1");
+        if (currentToken) {
+          localStorage.setItem("mainPageToken", currentToken);
+        }
 
         console.log("새로운 추천 받음:", response.data.outfits.length, "개 코디");
       }
 
       // 플래그 설정: 이 페이지에 있음을 표시
       sessionStorage.setItem("mainPageNavigating", "true");
-    } catch (err: any) {
+    } catch (err) {
       console.error("코디 로딩 실패:", err);
       setError("코디를 불러오는데 실패했습니다");
     } finally {
@@ -181,7 +200,7 @@ export default function MainPage() {
       // 로컬 스토리지 업데이트
       localStorage.setItem("mainPageOutfits", JSON.stringify(newOutfits));
       localStorage.setItem("mainPageCurrentPage", (currentPage + 1).toString());
-    } catch (err: any) {
+    } catch (err) {
       console.error("추가 코디 로딩 실패:", err);
     } finally {
       setIsLoadingMore(false);
@@ -235,7 +254,7 @@ export default function MainPage() {
 
     try {
       await recordViewLog(currentOutfit.id, durationSeconds);
-    } catch (err: any) {
+    } catch (err) {
       console.error("View log 기록 실패:", err);
       // 에러가 나도 사용자 경험에 영향 없도록 무시
     }
@@ -341,7 +360,7 @@ export default function MainPage() {
         // 로컬 스토리지 업데이트
         localStorage.setItem("mainPageOutfits", JSON.stringify(updatedOutfits));
       }
-    } catch (err: any) {
+    } catch (err) {
       console.error("좋아요 실패:", err);
       alert("좋아요 처리에 실패했습니다");
     }
@@ -372,10 +391,11 @@ export default function MainPage() {
       localStorage.removeItem("mainPageOutfits");
       localStorage.removeItem("mainPageCurrentOutfitId");
       localStorage.removeItem("mainPageCurrentPage");
+      localStorage.removeItem("mainPageToken");
 
       await logout();
       router.push("/start");
-    } catch (err) {
+    } catch (_err) {
       router.push("/start");
     }
   };
@@ -404,14 +424,16 @@ export default function MainPage() {
       alert("이미 옷장에 저장된 아이템입니다");
       return;
     }
-    
+
     try {
       await saveClosetItem(itemId);
       setSavedItems([...savedItems, itemId]);
       alert("✅ 옷장에 저장되었습니다!");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
-      alert(errorMessage);
+      console.error("옷장 저장 실패:", err);
+      // const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
+      // alert(errorMessage);
+      alert("저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -445,10 +467,10 @@ export default function MainPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
-      
+    <div className="h-[100dvh] bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden text-gray-900">
+
       {/* 상단 네비게이션 */}
-      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
+      <nav className="bg-transparent px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center flex-shrink-0">
         <h1
           className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer font-snippet"
           onClick={() => {
@@ -459,7 +481,7 @@ export default function MainPage() {
         >
           Swell
         </h1>
-        
+
         {/* 프로필 드롭다운 */}
         <div className="relative" ref={dropdownRef}>
           <button
@@ -469,7 +491,7 @@ export default function MainPage() {
             <span className="font-medium">{userName}</span>
             <span className={`transition-transform duration-200 ${showDropdown ? "rotate-180" : ""}`}>▼</span>
           </button>
-          
+
           {showDropdown && (
             <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border py-2 z-50 animate-fadeIn">
               <button
@@ -496,7 +518,7 @@ export default function MainPage() {
       </nav>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 relative flex justify-center items-center px-6 py-8 md:pb-8 pb-24">
+      <div className="flex-1 relative flex justify-center items-center px-6 py-8 md:pb-8 pb-[calc(6rem+env(safe-area-inset-bottom))]">
 
         {/* 네비게이션 화살표 - 데스크톱 전용 */}
         <button
@@ -518,14 +540,13 @@ export default function MainPage() {
         {/* 스와이프 컨텐츠 */}
         <div
           {...swipeHandlers}
-          className={`max-w-[1400px] w-full flex gap-40 transition-opacity duration-300 ${
-            isTransitioning ? "opacity-0" : "opacity-100"
-          }`}
+          className={`max-w-[1400px] w-full flex gap-40 transition-opacity duration-300 ${isTransitioning ? "opacity-0" : "opacity-100"
+            }`}
         >
           {/* 왼쪽: 코디 이미지 */}
           <div className="w-full md:w-[45%] flex items-center justify-center">
             {outfits.length > 0 && currentOutfit ? (
-              <div className="relative w-full aspect-[3/4] max-h-[calc(100vh-200px)]">
+              <div className="relative w-full aspect-[3/4] max-h-[calc(100dvh-200px)]">
 
                 {/* 코디 이미지 카드 */}
                 <div
@@ -578,11 +599,10 @@ export default function MainPage() {
                 {/* 좋아요 버튼 - 크기 축소 */}
                 <button
                   onClick={handleToggleLike}
-                  className={`absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 border ${
-                    currentOutfit.isFavorite
-                      ? "bg-pink-50 border-pink-200 text-pink-500"
-                      : "bg-white/90 backdrop-blur-sm border-gray-200 text-gray-400"
-                  }`}
+                  className={`absolute top-4 right-4 w-10 h-10 md:w-12 md:h-12 rounded-full shadow-lg flex items-center justify-center hover:scale-110 active:scale-95 transition-all duration-300 border ${currentOutfit.isFavorite
+                    ? "bg-pink-50 border-pink-200 text-pink-500"
+                    : "bg-white/90 backdrop-blur-sm border-gray-200 text-gray-400"
+                    }`}
                 >
                   <HeartIcon
                     filled={currentOutfit.isFavorite}
@@ -613,8 +633,8 @@ export default function MainPage() {
           <div className="hidden md:flex flex-col overflow-hidden" style={{ width: '600px' }}>
             {/* 필터 영역 - 주석 처리: 필터 비활성화 */}
             {/* <div className="mb-6 flex-shrink-0"> */}
-              {/* 계절 필터 */}
-              {/* <div className="mb-4">
+            {/* 계절 필터 */}
+            {/* <div className="mb-4">
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Season</h3>
                 <div className="flex flex-wrap gap-2">
                   {seasons.map((season) => (
@@ -641,8 +661,8 @@ export default function MainPage() {
                 </div>
               </div> */}
 
-              {/* 스타일 필터 */}
-              {/* <div>
+            {/* 스타일 필터 */}
+            {/* <div>
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Style</h3>
                 <div className="flex flex-wrap gap-2">
                   {styles.map((style) => (
@@ -679,7 +699,7 @@ export default function MainPage() {
                     {currentOutfit.items.length}
                   </span>
                 </h2>
-                
+
                 <div className="flex flex-col gap-2 overflow-y-auto pr-2 pb-20 custom-scrollbar">
                   {currentOutfit.items.map((item) => (
                     <div
@@ -736,11 +756,10 @@ export default function MainPage() {
                           {/* ✅ Add Closet 버튼 */}
                           <button
                             onClick={() => handleSaveToCloset(item.id)}
-                            className={`px-2 py-1 text-[9px] rounded-md transition-all font-medium ${
-                              savedItems.includes(item.id)
-                                ? "bg-gray-800 text-white"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`px-2 py-1 text-[9px] rounded-md transition-all font-medium ${savedItems.includes(item.id)
+                              ? "bg-gray-800 text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                              }`}
                           >
                             {savedItems.includes(item.id) ? "Saved ✓" : "Add Closet"}
                           </button>
@@ -764,7 +783,7 @@ export default function MainPage() {
       </button>
 
       {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
 
       {/* 모바일 하단 시트 (상품 목록) */}
       <AnimatePresence>
@@ -782,34 +801,36 @@ export default function MainPage() {
 
             {/* 하단 시트 */}
             <motion.div
-              {...bottomSheetSwipeHandlers}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[75vh] flex flex-col"
             >
-              {/* 핸들 */}
-              <div className="flex justify-center py-3 border-b border-gray-100">
-                <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-              </div>
-
-              {/* 상품 목록 헤더 */}
-              {currentOutfit && (
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span>Items</span>
-                    <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {currentOutfit.items.length}
-                    </span>
-                  </h2>
+              {/* 스와이프 영역 (헤더만) */}
+              <div {...bottomSheetSwipeHandlers}>
+                {/* 핸들 */}
+                <div className="flex justify-center py-3 border-b border-gray-100">
+                  <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
                 </div>
-              )}
+
+                {/* 상품 목록 헤더 */}
+                {currentOutfit && (
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                      <span>Items</span>
+                      <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {currentOutfit.items.length}
+                      </span>
+                    </h2>
+                  </div>
+                )}
+              </div>
 
               {/* 상품 목록 */}
               {currentOutfit && (
                 <div className="flex-1 overflow-y-auto px-6 py-4">
-                  <div className="flex flex-col gap-3 pb-6">
+                  <div className="flex flex-col gap-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
                     {currentOutfit.items.map((item) => (
                       <div
                         key={item.id}
@@ -863,11 +884,10 @@ export default function MainPage() {
                             )}
                             <button
                               onClick={() => handleSaveToCloset(item.id)}
-                              className={`px-3 py-1.5 text-[10px] rounded-md transition-all font-medium ${
-                                savedItems.includes(item.id)
-                                  ? "bg-gray-800 text-white"
-                                  : "bg-gray-100 text-gray-600 active:bg-gray-200"
-                              }`}
+                              className={`px-3 py-1.5 text-[10px] rounded-md transition-all font-medium ${savedItems.includes(item.id)
+                                ? "bg-gray-800 text-white"
+                                : "bg-gray-100 text-gray-600 active:bg-gray-200"
+                                }`}
                             >
                               {savedItems.includes(item.id) ? "Saved ✓" : "Add Closet"}
                             </button>

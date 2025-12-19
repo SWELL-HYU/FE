@@ -79,7 +79,7 @@ export default function OnboardingPage() {
       setSelectedOutfits(selectedOutfits.filter((id) => id !== outfitId));
     } else {
       if (selectedOutfits.length >= 5) {
-        alert("정확히 5개만 선택해야 합니다");
+        alert("최대 5개까지 선택할 수 있습니다");
         return;
       }
       setSelectedOutfits([...selectedOutfits, outfitId]);
@@ -113,8 +113,8 @@ export default function OnboardingPage() {
 
   // 제출
   const handleSubmit = async () => {
-    if (selectedOutfits.length !== 5) {
-      alert("정확히 5개의 코디를 선택해주세요");
+    if (selectedOutfits.length < 1) {
+      alert("최소 1개의 코디를 선택해주세요");
       return;
     }
 
@@ -126,8 +126,8 @@ export default function OnboardingPage() {
         sampleOutfitIds: selectedOutfits,
       });
 
-      // 성공 시 메인 페이지로
-      router.push("/main");
+      // 성공 시 튜토리얼 페이지로
+      router.push("/tutorial");
     } catch (err: any) {
       console.error("선호도 저장 실패:", err);
       const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
@@ -264,12 +264,12 @@ export default function OnboardingPage() {
                   마음에 드는 코디를 골라보세요
                 </h2>
                 <p className="text-xs text-gray-500 text-center mb-2">
-                  5개의 코디를 선택해주세요
+                  최소 1개, 최대 5개의 코디를 선택해주세요
                 </p>
 
                 {/* 선택 카운터 */}
                 <div className="text-center">
-                  <span className={`text-sm font-bold ${selectedOutfits.length === 5 ? "text-[#5697B0]" : "text-gray-400"
+                  <span className={`text-sm font-bold ${selectedOutfits.length >= 1 ? "text-[#5697B0]" : "text-gray-400"
                     }`}>
                     {selectedOutfits.length}
                   </span>
@@ -338,7 +338,7 @@ export default function OnboardingPage() {
                 </button>
                 <button
                   onClick={handleSubmit}
-                  disabled={selectedOutfits.length !== 5 || submitting}
+                  disabled={selectedOutfits.length < 1 || submitting}
                   className="flex-1 py-2 bg-[#5697B0] text-white rounded-lg text-sm font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                 >
                   {submitting ? "저장 중..." : "완료"}
@@ -418,10 +418,10 @@ export default function OnboardingPage() {
                     마음에 드는 코디를 골라보세요
                   </h2>
                   <p className="text-[11px] text-gray-600 mb-2">
-                    5개의 코디를 선택해주세요
+                    최소 1개, 최대 5개의 코디를 선택해주세요
                   </p>
                   <div className="text-center">
-                    <span className={`text-xs font-bold ${selectedOutfits.length === 5 ? "text-[#5697B0]" : "text-gray-500"
+                    <span className={`text-xs font-bold ${selectedOutfits.length >= 1 ? "text-[#5697B0]" : "text-gray-500"
                       }`}>
                       {selectedOutfits.length}
                     </span>
@@ -466,7 +466,7 @@ export default function OnboardingPage() {
                   </button>
                   <button
                     onClick={handleSubmit}
-                    disabled={selectedOutfits.length !== 5 || submitting}
+                    disabled={selectedOutfits.length < 1 || submitting}
                     className="flex-1 py-2 bg-[#5697B0] text-white rounded-lg text-xs font-medium hover:opacity-90 disabled:opacity-50 transition-all"
                   >
                     {submitting ? "저장 중..." : "완료"}

@@ -4,9 +4,9 @@ import { useState, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { getFavorites, removeFavorite } from "@/lib/outfits";
 import { saveClosetItem } from "@/lib/closet";
-import { logout } from "@/lib/auth";
+import { logout, getMe } from "@/lib/auth";
 import HeartIcon from "@/components/common/HeartIcon";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
 import type { Outfit } from "@/types/api";
 
 export default function FavoritesPage() {
@@ -52,6 +52,15 @@ export default function FavoritesPage() {
     const storedName = sessionStorage.getItem("userName");
     if (storedName) {
       setUserName(storedName);
+    } else {
+      getMe().then((res) => {
+        if (res.success && res.data.user.name) {
+          setUserName(res.data.user.name);
+          sessionStorage.setItem("userName", res.data.user.name);
+        }
+      }).catch((err) => {
+        console.error("사용자 정보 조회 실패:", err);
+      });
     }
   }, [router]);
 
@@ -138,9 +147,9 @@ export default function FavoritesPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col">
+    <div className="h-[100dvh] overflow-hidden bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col">
       {/* 상단 네비게이션 */}
-      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
+      <nav className="bg-transparent px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center flex-shrink-0">
         {/* 모바일: Swell 로고 / 데스크톱: ← Main + 페이지 제목 */}
         <div className="flex items-center gap-4">
           {/* 데스크톱 전용 */}
@@ -194,7 +203,7 @@ export default function FavoritesPage() {
       </nav>
 
       {/* 메인 컨텐츠 */}
-      <div className="flex-1 overflow-auto px-6 py-8 pb-20">
+      <div className="flex-1 overflow-auto px-6 py-8 pb-[calc(5rem+env(safe-area-inset-bottom))]">
         {error && (
           <div className="text-center mb-6">
             <p className="text-red-500 mb-4">{error}</p>
@@ -400,11 +409,10 @@ export default function FavoritesPage() {
                           )}
                           <button
                             onClick={() => handleSaveToCloset(item.id)}
-                            className={`px-3 py-1.5 text-xs rounded-md transition-all font-medium ${
-                              savedItems.includes(item.id)
-                                ? "bg-gray-800 text-white"
-                                : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                            }`}
+                            className={`px-3 py-1.5 text-xs rounded-md transition-all font-medium ${savedItems.includes(item.id)
+                              ? "bg-gray-800 text-white"
+                              : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                              }`}
                           >
                             {savedItems.includes(item.id) ? "Saved ✓" : "Add Closet"}
                           </button>
@@ -419,8 +427,7 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
     </div>
   );
 }
