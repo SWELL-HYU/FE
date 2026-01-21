@@ -133,14 +133,16 @@ export default function StartPage() {
             className={`flex-1 rounded-[10px] p-8 flex flex-col backdrop-blur-xl shadow-2xl border border-white/40 justify-center transition-all duration-500 relative overflow-hidden`}
             style={{ backgroundColor: "rgba(235, 235, 230, 0.6)" }}
           >
-            {/* 상단 헤더 영역 */}
-            <div className="mb-8 text-center relative z-10">
-              <h1 className="text-[40px] leading-[48px] text-gray-900 font-outfit mb-3">
-                Swell
-              </h1>
-              <p className="text-gray-600 font-manrope text-[16px]">
+            {/* 상단 헤더 영역 - Admin Mode일 때는 공간 확보를 위해 타이틀 축소/숨김 */}
+            <div className={`text-center relative z-10 ${isAdminMode ? 'mb-2' : 'mb-8'}`}>
+              {!isAdminMode && (
+                <h1 className="text-[40px] leading-[48px] text-gray-900 font-outfit mb-3">
+                  Swell
+                </h1>
+              )}
+              <p className={`text-gray-600 font-manrope ${isAdminMode ? 'text-[20px] font-bold text-gray-800' : 'text-[16px]'}`}>
                 {isAdminMode
-                  ? (isLogin ? "Admin Login" : "Admin Sign Up")
+                  ? (isLogin ? "Admin Login" : "Create Admin Account")
                   : "성별을 선택하고 시작하세요"}
               </p>
             </div>
@@ -153,10 +155,10 @@ export default function StartPage() {
             )}
 
             {/* Content Switcher */}
-            <div className="relative z-10">
+            <div className="relative z-10 w-full px-8">
               {!isAdminMode ? (
                 // === 일반 사용자 모드 (성별 선택) ===
-                <div className="flex flex-col gap-4 px-4">
+                <div className="flex flex-col gap-4">
                   <button
                     onClick={() => handleGenderSelect("female")}
                     disabled={loading}
@@ -178,34 +180,45 @@ export default function StartPage() {
                       <div className="w-5 h-5 bg-black rounded-full opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </button>
+
+                  {/* Admin Toggle Link (Centered) */}
+                  <button
+                    onClick={() => {
+                      setIsAdminMode(true);
+                      setError("");
+                    }}
+                    className="mt-6 text-sm text-gray-400 hover:text-gray-800 transition-colors font-medium border-b border-transparent hover:border-gray-800 self-center w-fit mx-auto"
+                  >
+                    Admin Access
+                  </button>
                 </div>
               ) : (
                 // === 관리자 모드 (이메일 로그인/가입) ===
-                <div className="space-y-4 px-4 animate-fadeIn">
+                <div className="animate-fadeIn flex flex-col h-full">
                   {/* Login / Signup Toggle Tabs */}
-                  <div className="flex bg-white/40 p-1 rounded-xl mb-6">
+                  <div className="flex bg-gray-100/50 p-1 rounded-xl mb-4 border border-white/20">
                     <button
                       onClick={() => { setIsLogin(true); setError(""); }}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${isLogin ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${isLogin ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Login
                     </button>
                     <button
                       onClick={() => { setIsLogin(false); setError(""); }}
-                      className={`flex-1 py-2 text-sm font-medium rounded-lg transition-all ${!isLogin ? 'bg-white shadow-sm text-black' : 'text-gray-500 hover:text-gray-700'}`}
+                      className={`flex-1 py-2 text-sm font-semibold rounded-lg transition-all duration-300 ${!isLogin ? 'bg-white shadow-[0_2px_8px_rgba(0,0,0,0.08)] text-gray-900' : 'text-gray-500 hover:text-gray-700'}`}
                     >
                       Sign Up
                     </button>
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <input
                       type="email"
-                      placeholder="Email"
+                      placeholder="Email Address"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="w-full h-[52px] px-4 bg-white/60 border border-white/20 rounded-xl outline-none text-gray-800 placeholder:text-gray-500/70 focus:bg-white/90 focus:shadow-md transition-all font-manrope"
+                      className="w-full h-[46px] px-4 bg-white/70 border border-white/40 rounded-xl outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 transition-all font-manrope text-[14px]"
                     />
                     <input
                       type="password"
@@ -213,63 +226,66 @@ export default function StartPage() {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       onKeyPress={handleKeyPress}
-                      className="w-full h-[52px] px-4 bg-white/60 border border-white/20 rounded-xl outline-none text-gray-800 placeholder:text-gray-500/70 focus:bg-white/90 focus:shadow-md transition-all font-manrope"
+                      className="w-full h-[46px] px-4 bg-white/70 border border-white/40 rounded-xl outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 transition-all font-manrope text-[14px]"
                     />
 
                     {!isLogin && (
-                      <>
+                      <div className="space-y-2 animate-fadeIn">
                         <input
                           type="password"
                           placeholder="Confirm Password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           onKeyPress={handleKeyPress}
-                          className="w-full h-[52px] px-4 bg-white/60 border border-white/20 rounded-xl outline-none text-gray-800 placeholder:text-gray-500/70 focus:bg-white/90 focus:shadow-md transition-all font-manrope"
+                          className="w-full h-[46px] px-4 bg-white/70 border border-white/40 rounded-xl outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 transition-all font-manrope text-[14px]"
                         />
                         <input
                           type="text"
-                          placeholder="Name"
+                          placeholder="Display Name"
                           value={name}
                           onChange={(e) => setName(e.target.value)}
                           onKeyPress={handleKeyPress}
-                          className="w-full h-[52px] px-4 bg-white/60 border border-white/20 rounded-xl outline-none text-gray-800 placeholder:text-gray-500/70 focus:bg-white/90 focus:shadow-md transition-all font-manrope"
+                          className="w-full h-[46px] px-4 bg-white/70 border border-white/40 rounded-xl outline-none text-gray-800 placeholder:text-gray-400 focus:bg-white focus:border-gray-300 transition-all font-manrope text-[14px]"
                         />
-                        <div className="flex gap-4 p-2 justify-center">
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" checked={adminGender === 'male'} onChange={() => setAdminGender('male')} className="accent-black" />
-                            <span className="text-sm">Male</span>
-                          </label>
-                          <label className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" checked={adminGender === 'female'} onChange={() => setAdminGender('female')} className="accent-black" />
-                            <span className="text-sm">Female</span>
-                          </label>
+
+                        {/* Improved Gender Selection */}
+                        <div className="flex gap-3 pt-1">
+                          <button
+                            onClick={() => setAdminGender('male')}
+                            className={`flex-1 h-[44px] rounded-xl border flex items-center justify-center gap-2 transition-all ${adminGender === 'male' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/50 border-white/40 text-gray-600 hover:bg-white/80'}`}
+                          >
+                            <span className="text-sm font-medium">Male</span>
+                          </button>
+                          <button
+                            onClick={() => setAdminGender('female')}
+                            className={`flex-1 h-[44px] rounded-xl border flex items-center justify-center gap-2 transition-all ${adminGender === 'female' ? 'bg-gray-900 text-white border-gray-900 shadow-md' : 'bg-white/50 border-white/40 text-gray-600 hover:bg-white/80'}`}
+                          >
+                            <span className="text-sm font-medium">Female</span>
+                          </button>
                         </div>
-                      </>
+                      </div>
                     )}
                   </div>
 
                   <button
                     onClick={handleAdminAuth}
                     disabled={loading}
-                    className="w-full h-[52px] bg-black text-white rounded-xl flex items-center justify-center hover:bg-gray-800 hover:scale-[1.02] disabled:opacity-50 transition-all shadow-lg mt-4 font-bold"
+                    className="w-full h-[50px] bg-gray-900 text-white rounded-xl flex items-center justify-center hover:bg-black hover:shadow-lg disabled:opacity-70 disabled:hover:shadow-none transition-all mt-4 font-bold text-[15px] tracking-wide"
                   >
-                    {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : (isLogin ? "Login" : "Create Account")}
+                    {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : (isLogin ? "Sign In" : "Create Account")}
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      setIsAdminMode(false);
+                      setError("");
+                    }}
+                    className="mt-3 text-xs text-gray-400 hover:text-gray-800 transition-colors font-medium border-b border-transparent hover:border-gray-800 self-center w-fit"
+                  >
+                    Back to Selection
                   </button>
                 </div>
               )}
-            </div>
-
-            {/* Admin Toggle Button (Bottom Right) */}
-            <div className="absolute bottom-4 right-4 z-20">
-              <button
-                onClick={() => {
-                  setIsAdminMode(!isAdminMode);
-                  setError("");
-                }}
-                className="text-[11px] font-bold text-gray-400 hover:text-black uppercase tracking-widest transition-colors px-2 py-1"
-              >
-                {isAdminMode ? "Back" : "For Admin"}
-              </button>
             </div>
 
             {/* Loading Overlay */}
@@ -282,20 +298,31 @@ export default function StartPage() {
           </div>
 
           {/* 프로모 카드 - 유지 */}
+          {/* 프로모 카드 */}
           <div
-            className="rounded-[10px] flex flex-col p-6 min-h-[200px] backdrop-blur-2xl shadow-2xl border border-white/10 relative overflow-hidden"
+            className={`rounded-[10px] flex flex-col backdrop-blur-2xl shadow-2xl border border-white/10 relative overflow-hidden transition-all duration-500 ${isAdminMode && !isLogin ? "min-h-[60px] p-4 justify-center" : "min-h-[200px] p-6"
+              }`}
             style={{ backgroundColor: "rgba(20, 24, 28, 0.9)" }}
           >
-            <div className="flex justify-between items-start mb-2 relative z-10">
-              <span className="text-white/60 font-outfit text-sm">New In</span>
-              <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
-            </div>
-            <h3 className="text-white font-outfit text-2xl font-bold mb-1 relative z-10">
-              Swell<br />Archive
-            </h3>
-            <p className="text-white/40 text-xs font-manrope mt-auto relative z-10">
-              Discover the latest collection &rarr;
-            </p>
+            {isAdminMode && !isLogin ? (
+              <div className="flex justify-between items-center relative z-10">
+                <span className="text-white/90 font-outfit text-lg font-bold">Swell Archive</span>
+                <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between items-start mb-2 relative z-10">
+                  <span className="text-white/60 font-outfit text-sm">New In</span>
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                </div>
+                <h3 className="text-white font-outfit text-2xl font-bold mb-1 relative z-10">
+                  Swell<br />Archive
+                </h3>
+                <p className="text-white/40 text-xs font-manrope mt-auto relative z-10">
+                  Discover the latest collection &rarr;
+                </p>
+              </>
+            )}
           </div>
         </div>
 
@@ -331,7 +358,7 @@ export default function StartPage() {
                     당신의 취향을 발견하세요<br />
                     Start your fashion journey.
                   </p>
-                  <div className="w-[120px] h-[120px] relative drop-shadow-2xl self-end mr-8">
+                  <div className="w-[200px] h-[200px] relative drop-shadow-2xl self-center mt-8 hover:scale-110 transition-transform duration-500">
                     <Image
                       src="/images/swell_wo_bg.png"
                       alt="Swell Logo"
@@ -538,9 +565,19 @@ export default function StartPage() {
               <button
                 onClick={handleAdminAuth}
                 disabled={loading}
-                className="w-full h-[44px] bg-black text-white rounded-xl flex items-center justify-center hover:bg-gray-900 disabled:opacity-50 transition-all shadow-lg text-[13px] font-bold"
+                className="w-full h-[50px] bg-black text-white rounded-xl flex items-center justify-center hover:bg-gray-900 disabled:opacity-50 transition-all shadow-lg text-[14px] font-bold mt-4"
               >
                 {loading ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : (isLogin ? "Login" : "Sign Up")}
+              </button>
+
+              <button
+                onClick={() => {
+                  setIsAdminMode(false);
+                  setError("");
+                }}
+                className="mt-4 text-xs font-medium text-gray-400 hover:text-black transition-colors border-b border-transparent hover:border-black mx-auto block"
+              >
+                Back to Selection
               </button>
             </div>
           )}
@@ -551,17 +588,19 @@ export default function StartPage() {
             </div>
           )}
 
-          <div className="flex justify-center mt-6">
-            <button
-              onClick={() => {
-                setIsAdminMode(!isAdminMode);
-                setError("");
-              }}
-              className="text-[10px] uppercase font-bold text-gray-400 hover:text-black tracking-widest px-2"
-            >
-              {isAdminMode ? "Back" : "For Admin"}
-            </button>
-          </div>
+          {!isAdminMode && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={() => {
+                  setIsAdminMode(true);
+                  setError("");
+                }}
+                className="text-[11px] uppercase font-bold text-gray-400 hover:text-black tracking-widest px-2"
+              >
+                For Admin
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>

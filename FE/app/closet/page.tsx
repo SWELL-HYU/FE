@@ -385,9 +385,8 @@ export default function ClosetPage() {
       return;
     }
 
-    const selectedCount = selectedItems.length;
-    // 아이템당 약 15초 소요 예상
-    const estimated = selectedCount * 15;
+    // 피팅 소요 시간: 약 45초 고정 (사용자 요청 40-50초)
+    const estimated = 45;
     setEstimatedSeconds(estimated);
 
     setFittingStatus("processing");

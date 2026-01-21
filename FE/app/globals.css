@@ -40,7 +40,8 @@ body {
   overscroll-behavior: none;
   overflow: hidden;
   width: 100vw;
-  height: 100dvh; /* fallback for browsers supporting dvh */
+  height: 100dvh;
+  /* fallback for browsers supporting dvh */
 }
 
 @supports not (height: 100dvh) {
