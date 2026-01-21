@@ -119,7 +119,7 @@ export default function StartPage() {
 
   return (
     <div
-      className="relative min-h-screen flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
+      className="relative min-h-[100dvh] flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/images/start_bg.png')" }}
     >
       {/* 데스크톱 레이아웃 */}
@@ -439,11 +439,11 @@ export default function StartPage() {
       </div>
 
       {/* 모바일 레이아웃 */}
-      <div className="md:hidden absolute inset-0 flex flex-col justify-center px-6 pb-24">
-        <div className="w-full max-w-[300px] mx-auto animate-fadeIn bg-white/70 backdrop-blur-xl p-6 rounded-3xl border border-white/50 shadow-2xl relative">
-
-          <div className="mb-8 text-center">
-            <h1 className="text-[32px] font-bold text-gray-900 font-outfit mb-2">
+      <div className="md:hidden absolute inset-0 flex flex-col justify-center px-6 pb-[calc(6rem+env(safe-area-inset-bottom))]">
+        <div className="w-full max-w-[300px] mx-auto animate-fadeIn">
+          {/* 헤더 */}
+          <div className="flex justify-between items-center mb-8">
+            <h1 className="text-[28px] font-bold text-gray-900 font-outfit tracking-tight drop-shadow-md">
               Swell
             </h1>
             <p className="text-gray-600 text-sm">

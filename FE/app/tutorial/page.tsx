@@ -423,7 +423,7 @@ export default function TutorialPage() {
 
         return (
             <div
-                className="relative min-h-screen flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
+                className="relative min-h-[100dvh] flex items-center justify-center p-4 md:p-8 bg-cover bg-center bg-no-repeat"
                 style={{ backgroundImage: "url('/images/start_bg.png')" }}
             >
                 {/* 데스크톱 레이아웃 (Start Page Guide Card 스타일) */}
@@ -530,7 +530,7 @@ export default function TutorialPage() {
             {/* 컨텐츠 */}
             <div className="absolute inset-0 flex flex-col">
                 {/* 상단 진행바 */}
-                <div className="w-full flex gap-1 p-2 pt-12 px-4 z-50">
+                <div className="w-full flex gap-1 p-2 pt-[calc(3rem+env(safe-area-inset-top))] px-4 z-50">
                     {mobileSteps.map((_, i) => (
                         <div
                             key={i}
@@ -557,7 +557,7 @@ export default function TutorialPage() {
                 </div>
 
                 {/* 하단 버튼 */}
-                <div className="p-6 pb-12 z-50">
+                <div className="p-6 pb-[calc(3rem+env(safe-area-inset-bottom))] z-50">
                     <button
                         onClick={handleNext}
                         className="w-full py-4 bg-white text-gray-900 rounded-xl font-bold text-lg shadow-lg hover:scale-[1.02] active:scale-[0.98] transition-all"

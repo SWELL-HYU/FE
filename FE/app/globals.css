@@ -40,7 +40,13 @@ body {
   overscroll-behavior: none;
   overflow: hidden;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh; /* fallback for browsers supporting dvh */
+}
+
+@supports not (height: 100dvh) {
+  body {
+    height: 100vh;
+  }
 }
 
 @keyframes slideUp {
@@ -61,5 +67,7 @@ html {
   overscroll-behavior: none;
   overflow: hidden;
   width: 100vw;
-  height: 100vh;
+  height: 100dvh;
+  -webkit-text-size-adjust: 100%;
+  -webkit-tap-highlight-color: transparent;
 }

@@ -8,7 +8,7 @@ import { getRecommendations, addFavorite, removeFavorite, recordViewLog, skipOut
 import { saveClosetItem } from "@/lib/closet";
 import { logout, getMe } from "@/lib/auth";
 import HeartIcon from "@/components/common/HeartIcon";
-import MobileBottomNav from "@/components/layout/MobileBottomNav";
+
 import type { Outfit } from "@/types/api";
 
 export default function MainPage() {
@@ -426,11 +426,14 @@ export default function MainPage() {
     }
 
     try {
+      await saveClosetItem(itemId);
       setSavedItems([...savedItems, itemId]);
       alert("✅ 옷장에 저장되었습니다!");
     } catch (err: any) {
-      const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
-      alert(errorMessage);
+      console.error("옷장 저장 실패:", err);
+      // const errorMessage = err.response?.data?.error?.message || "저장에 실패했습니다";
+      // alert(errorMessage);
+      alert("저장에 실패했습니다. 다시 시도해주세요.");
     }
   };
 
@@ -464,10 +467,10 @@ export default function MainPage() {
   }
 
   return (
-    <div className="h-screen bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden">
+    <div className="h-[100dvh] bg-gradient-to-b from-[rgba(86,151,176,0.45)] via-[rgba(255,244,234,0.65)] to-[rgba(255,244,234,1)] flex flex-col overflow-hidden text-gray-900">
 
       {/* 상단 네비게이션 */}
-      <nav className="bg-transparent px-6 py-4 flex justify-between items-center flex-shrink-0">
+      <nav className="bg-transparent px-6 pb-4 pt-[calc(1rem+env(safe-area-inset-top))] flex justify-between items-center flex-shrink-0">
         <h1
           className="text-[20px] font-bold text-gray-900 flex items-center gap-2 cursor-pointer font-snippet"
           onClick={() => {
@@ -515,7 +518,7 @@ export default function MainPage() {
       </nav>
 
       {/* 메인 컨텐츠 영역 */}
-      <div className="flex-1 relative flex justify-center items-center px-6 py-8 md:pb-8 pb-24">
+      <div className="flex-1 relative flex justify-center items-center px-6 py-8 md:pb-8 pb-[calc(6rem+env(safe-area-inset-bottom))]">
 
         {/* 네비게이션 화살표 - 데스크톱 전용 */}
         <button
@@ -543,7 +546,7 @@ export default function MainPage() {
           {/* 왼쪽: 코디 이미지 */}
           <div className="w-full md:w-[45%] flex items-center justify-center">
             {outfits.length > 0 && currentOutfit ? (
-              <div className="relative w-full aspect-[3/4] max-h-[calc(100vh-200px)]">
+              <div className="relative w-full aspect-[3/4] max-h-[calc(100dvh-200px)]">
 
                 {/* 코디 이미지 카드 */}
                 <div
@@ -780,7 +783,7 @@ export default function MainPage() {
       </button>
 
       {/* 모바일 하단 네비게이션 바 */}
-      <MobileBottomNav />
+
 
       {/* 모바일 하단 시트 (상품 목록) */}
       <AnimatePresence>
@@ -798,34 +801,36 @@ export default function MainPage() {
 
             {/* 하단 시트 */}
             <motion.div
-              {...bottomSheetSwipeHandlers}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
               className="md:hidden fixed bottom-0 left-0 right-0 bg-white rounded-t-3xl shadow-2xl z-50 max-h-[75vh] flex flex-col"
             >
-              {/* 핸들 */}
-              <div className="flex justify-center py-3 border-b border-gray-100">
-                <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
-              </div>
-
-              {/* 상품 목록 헤더 */}
-              {currentOutfit && (
-                <div className="px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
-                    <span>Items</span>
-                    <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
-                      {currentOutfit.items.length}
-                    </span>
-                  </h2>
+              {/* 스와이프 영역 (헤더만) */}
+              <div {...bottomSheetSwipeHandlers}>
+                {/* 핸들 */}
+                <div className="flex justify-center py-3 border-b border-gray-100">
+                  <div className="w-12 h-1.5 bg-gray-300 rounded-full"></div>
                 </div>
-              )}
+
+                {/* 상품 목록 헤더 */}
+                {currentOutfit && (
+                  <div className="px-6 py-4 border-b border-gray-100">
+                    <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
+                      <span>Items</span>
+                      <span className="text-xs font-normal text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">
+                        {currentOutfit.items.length}
+                      </span>
+                    </h2>
+                  </div>
+                )}
+              </div>
 
               {/* 상품 목록 */}
               {currentOutfit && (
                 <div className="flex-1 overflow-y-auto px-6 py-4">
-                  <div className="flex flex-col gap-3 pb-6">
+                  <div className="flex flex-col gap-3 pb-[calc(1.5rem+env(safe-area-inset-bottom))]">
                     {currentOutfit.items.map((item) => (
                       <div
                         key={item.id}
