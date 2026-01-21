@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // API Base URL from environment variable
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "https://swell-final-backend-513885138419.asia-northeast3.run.app";
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://54.180.130.159:8000";
 
 // 🔍 환경변수 확인용 (확인 후 삭제)
 console.log("🌐 API_BASE_URL:", API_BASE_URL);
