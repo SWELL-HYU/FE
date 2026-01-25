@@ -1,7 +1,7 @@
 import axios from "axios";
 
 // API Base URL from environment variable
-export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://54.180.130.159:8000";
+export const API_BASE_URL = "https://d1j5lw5h0schlj.cloudfront.net";
 
 // 🔍 환경변수 확인용 (확인 후 삭제)
 console.log("🌐 API_BASE_URL:", API_BASE_URL);

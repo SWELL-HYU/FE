@@ -126,6 +126,141 @@ export default function ClosetPage() {
     setIsSelectorOpen(false);
   };
 
+  // 카메라 상태 (웹 전용)
+  const [isCameraOpen, setIsCameraOpen] = useState(false);
+  const [isRequestingCamera, setIsRequestingCamera] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  const startCamera = async () => {
+    // 1. 보안 컨텍스트 확인 (HTTP에서는 navigator.mediaDevices가 undefined일 수 있음)
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert(
+        "카메라를 실행할 수 없습니다.\n\n브라우저 보안 정책상 HTTPS 또는 localhost 환경에서만 카메라 접근이 가능합니다.\n현재 접속 주소를 확인해주세요."
+      );
+      return;
+    }
+
+    try {
+      setIsRequestingCamera(true);
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+      // 권한 허용 후 상태 변경
+      setIsCameraOpen(true);
+
+      // 상태 업데이트 후 DOM 렌더링 대기
+      setTimeout(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+        }
+        setIsRequestingCamera(false);
+      }, 100);
+    } catch (err) {
+      console.error("카메라 접근 실패:", err);
+      // 권한 거부 또는 취소 시
+      alert("카메라 권한이 차단되었습니다.\n\n브라우저 주소창 옆의 '자물쇠' 또는 '설정' 아이콘을 눌러 카메라 권한을 '허용'으로 변경해주세요.");
+      setIsRequestingCamera(false);
+      setIsCameraOpen(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (videoRef.current && videoRef.current.srcObject) {
+      const stream = videoRef.current.srcObject as MediaStream;
+      stream.getTracks().forEach(track => track.stop());
+      videoRef.current.srcObject = null;
+    }
+    setIsCameraOpen(false);
+  };
+
+  const [countdown, setCountdown] = useState<number | null>(null);
+  const [showFlash, setShowFlash] = useState(false);
+
+  const startInternalCapture = () => {
+    setCountdown(3);
+  };
+
+  useEffect(() => {
+    if (countdown === null) return;
+
+    if (countdown > 0) {
+      const timer = setTimeout(() => setCountdown(countdown - 1), 1000);
+      return () => clearTimeout(timer);
+    } else {
+      // 카운트다운 0 도달 시 촬영
+      triggerCapture();
+      setCountdown(null);
+    }
+  }, [countdown]);
+
+  const triggerCapture = () => {
+    // 플래시 효과
+    setShowFlash(true);
+    setTimeout(() => setShowFlash(false), 150);
+
+    capturePhoto();
+  };
+
+  // 실제 캡처 로직 (기존 capturePhoto 재활용하되, 내부 로직만 분리)
+  const capturePhoto = () => {
+    if (!videoRef.current) return;
+
+    const canvas = document.createElement("canvas");
+    canvas.width = videoRef.current.videoWidth;
+    canvas.height = videoRef.current.videoHeight;
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      // 미러링된 화면을 다시 원래대로 뒤집어서 그릴지 여부 결정.
+      // 캔버스에 그릴때도 좌우반전해서 "거울 모드" 그대로 저장할지, 아니면 원본대로 저장할지.
+      // 보통 사용자가 본 화면(거울모드) 그대로 저장되기를 원함.
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(videoRef.current, 0, 0);
+
+      canvas.toBlob(async (blob) => {
+        if (!blob) return;
+
+        // File 객체로 변환
+        const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
+
+        // 업로드 진행 (비동기 처리)
+        try {
+          // 비동기 업로드를 위해 즉시 미리보기 처리해주면 더 좋음 (여기선 생략하고 로딩 표시 등은 기존 로직 따름)
+          console.log("📸 카메라 캡처 업로드 시작");
+
+          // 카메라 종료는 업로드 성공 후가 아니라 캡처 직후에 닫거나, 
+          // "처리중" 화면을 보여주는 것이 UX상 좋음.
+          // 여기서 우선 카메라를 닫고 "업로드 중/피팅 준비 중" 상태로 넘기는게 자연스러움.
+          stopCamera();
+
+          // 임시 로딩 등 필요하다면 추가. 여기서는 기존 uploadProfilePhoto가 완료될 때까지 기다림.
+          const response = await uploadProfilePhoto(file);
+
+          const fullPhotoUrl = response.data.photoUrl.startsWith("http")
+            ? response.data.photoUrl
+            : `${API_BASE_URL}${response.data.photoUrl}`;
+
+          setUserPhoto(fullPhotoUrl);
+          setFittingResult(null);
+          setFittingStatus("idle");
+
+        } catch (err) {
+          const error = err as any;
+          alert(error.response?.data?.error?.message || "사진 업로드 실패");
+          // 실패 시 카메라 다시 켜줄지 여부는 선택
+        }
+      }, "image/jpeg", 0.95);
+    }
+  };
+
+  // 컴포넌트 언마운트 시 카메라 정리
+  useEffect(() => {
+    return () => {
+      stopCamera();
+    };
+  }, []);
+
+
   // 초기화
   useEffect(() => {
     const token = sessionStorage.getItem("token");
@@ -245,10 +380,7 @@ export default function ClosetPage() {
         }
         // LLM 메시지는 history에 없으므로 (FittingHistoryItem 정의 확인 필요) 
         // 상세 조회 API를 호출하거나, history에 포함되어 있다면 사용.
-        // 현재 FittingHistoryItem에는 llmMessage가 없으므로 상세 조회 필요할 수 있음.
-        // 하지만 요구사항에는 "llmMessage 설절"이라고 되어 있음.
-        // API 명세 상 getFittingHistory 반환값에 llmMessage가 있는지 확인했었나?
-        // lib/fitting.ts FittingHistoryItem 에는 llmMessage가 없음.
+        // 현재 FittingHistoryItem에는 llmMessage가 없음.
         // 따라서 getFittingStatus(jobId)를 호출해서 가져오거나 해야 함.
         // 여기서는 상세 조회를 추가로 호출하여 확실하게 데이터를 가져오도록 개선.
 
@@ -599,14 +731,144 @@ export default function ClosetPage() {
                 </div>
               ) : (
                 // 업로드 영역
-                <div
-                  className="h-full flex flex-col items-center justify-center cursor-pointer hover:bg-gray-50 transition"
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <div className="text-6xl mb-4">📷</div>
-                  <p className="text-gray-600 font-medium">사진을 업로드하세요</p>
-                  <p className="text-sm text-gray-400 mt-2">클릭하여 파일 선택</p>
-                </div>
+                isCameraOpen ? (
+                  // 향상된 카메라 뷰 UI
+                  <div className="h-full bg-gray-900 relative flex flex-col items-center justify-center overflow-hidden rounded-2xl">
+                    {/* 비디오 스트림 */}
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      playsInline
+                      muted
+                      className="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]"
+                    />
+
+                    {/* 가이드 오버레이 (사람 실루엣) */}
+                    <div className="absolute inset-0 pointer-events-none flex items-end justify-center opacity-30">
+                      <svg viewBox="0 0 200 400" className="h-[90%] w-auto fill-none stroke-white stroke-[2] border-dashed">
+                        {/* 단순화된 사람 형태 가이드 */}
+                        <path d="M100,60 C115,60 125,75 125,90 C125,105 115,115 100,115 C85,115 75,105 75,90 C75,75 85,60 100,60 Z" /> {/* 머리 */}
+                        <path d="M 70,120 Q 50,140 40,200 L 40,300 M 130,120 Q 150,140 160,200 L 160,300" /> {/* 몸통 외곽 */}
+                      </svg>
+                      <p className="absolute top-10 text-white/80 text-sm font-medium bg-black/20 px-3 py-1 rounded-full backdrop-blur-sm">
+                        가이드라인에 맞춰주세요
+                      </p>
+                    </div>
+
+                    {/* 카운트다운 오버레이 */}
+                    {countdown !== null && (
+                      <div className="absolute inset-0 z-20 flex items-center justify-center bg-black/20 backdrop-blur-[2px]">
+                        <span className="text-white text-9xl font-bold animate-ping opacity-90">{countdown}</span>
+                      </div>
+                    )}
+
+                    {/* 플래시 효과 */}
+                    {showFlash && (
+                      <div className="absolute inset-0 z-30 bg-white animate-[fadeOut_0.2s_ease-out]"></div>
+                    )}
+
+                    {/* 컨트롤 바 */}
+                    <div className="absolute bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-black/60 to-transparent flex justify-between items-center z-10">
+                      <button
+                        onClick={stopCamera}
+                        className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center text-white hover:bg-white/20 transition"
+                        title="닫기"
+                      >
+                        ✕
+                      </button>
+
+                      <button
+                        onClick={startInternalCapture}
+                        disabled={countdown !== null}
+                        className="w-20 h-20 rounded-full border-4 border-white flex items-center justify-center bg-transparent hover:bg-white/10 transition active:scale-95"
+                      >
+                        <div className="w-16 h-16 rounded-full bg-white"></div>
+                      </button>
+
+                      <div className="w-12"></div> {/* 균형 맞추기용 빈 공간 */}
+                    </div>
+                  </div>
+                ) : (
+                  // Premium Upload/Camera Selection UI
+                  <div className="h-full flex flex-col items-center justify-center p-8 relative overflow-hidden bg-gray-50/30">
+
+                    {/* Decorative Background Elements */}
+                    <div className="absolute top-10 right-10 w-64 h-64 bg-blue-100/40 rounded-full blur-3xl pointer-events-none" />
+                    <div className="absolute bottom-10 left-10 w-48 h-48 bg-orange-100/40 rounded-full blur-3xl pointer-events-none" />
+
+                    <div className="z-10 w-full max-w-sm flex flex-col gap-6">
+                      <div className="text-center mb-2">
+                        <h3 className="text-xl font-bold text-gray-800">사진 준비하기</h3>
+                        <p className="text-sm text-gray-500 mt-1">지금 입고 있는 옷을 가상으로 입어보세요</p>
+                      </div>
+
+                      {/* Option 1: File Upload */}
+                      <div
+                        onClick={() => fileInputRef.current?.click()}
+                        className="group relative bg-white border border-gray-100 p-5 rounded-2xl shadow-sm hover:shadow-md hover:border-[#5697B0]/50 transition-all duration-300 cursor-pointer flex items-center gap-5 overflow-hidden"
+                      >
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-transparent to-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+                        <div className="w-14 h-14 bg-blue-50 text-[#5697B0] rounded-2xl flex items-center justify-center shadow-inner group-hover:scale-105 transition-transform duration-300">
+                          {/* Icon: Image */}
+                          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <h4 className="font-bold text-gray-800 group-hover:text-[#5697B0] transition-colors">사진 업로드</h4>
+                          <p className="text-xs text-gray-400 mt-1 group-hover:text-gray-500">내 앨범에서 선택하기</p>
+                        </div>
+                        <div className="text-gray-300 group-hover:text-[#5697B0] group-hover:translate-x-1 transition-all">
+                          <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                          </svg>
+                        </div>
+                      </div>
+
+                      {/* Option 2: Camera */}
+                      <button
+                        onClick={startCamera}
+                        disabled={isRequestingCamera}
+                        className="group relative bg-gradient-to-br from-[#5697B0] to-[#3d7a91] p-5 rounded-2xl shadow-lg shadow-blue-200/50 hover:shadow-xl hover:shadow-blue-300/60 hover:-translate-y-0.5 transition-all duration-300 text-left flex items-center gap-5 overflow-hidden"
+                      >
+                        {/* Shimmer Effect */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]" />
+
+                        {isRequestingCamera ? (
+                          <div className="w-full flex flex-col items-center justify-center py-2 gap-2 text-white/90">
+                            <div className="w-6 h-6 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <span className="text-sm font-medium">카메라 준비 중...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="w-14 h-14 bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl flex items-center justify-center text-white shadow-inner group-hover:rotate-6 transition-transform duration-300">
+                              {/* Icon: Camera */}
+                              <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <h4 className="font-bold text-white">카메라 촬영</h4>
+                              <p className="text-xs text-blue-100 mt-1 opacity-80 group-hover:opacity-100">지금 바로 찍어서 입어보기</p>
+                            </div>
+                            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-white/80 group-hover:bg-white group-hover:text-[#5697B0] transition-colors">
+                              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                              </svg>
+                            </div>
+                          </>
+                        )}
+                      </button>
+                    </div>
+
+                    <div className="mt-8 flex items-center gap-2 px-4 py-2 bg-white/60 backdrop-blur-md rounded-full border border-white/50 text-xs text-gray-500 shadow-sm">
+                      <span className="text-[#5697B0]">💡</span>
+                      전신이 잘 나오는 사진을 사용해주세요
+                    </div>
+                  </div>
+                )
               )}
 
               <input
@@ -622,10 +884,10 @@ export default function ClosetPage() {
             <div className="mt-4 flex gap-3">
               {userPhoto && (
                 <button
-                  onClick={() => fileInputRef.current?.click()}
+                  onClick={() => setUserPhoto(null)}
                   className="px-6 py-3 border-2 border-gray-300 rounded-xl hover:bg-gray-50 transition font-medium"
                 >
-                  사진 변경
+                  사진/카메라 변경
                 </button>
               )}
               <button
