@@ -130,6 +130,8 @@ export default function ClosetPage() {
   const [isCameraOpen, setIsCameraOpen] = useState(false);
   const [isRequestingCamera, setIsRequestingCamera] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  // 카메라 컨테이너 Ref (캡처 시 보이는 영역 기준점)
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const startCamera = async () => {
     // 1. 보안 컨텍스트 확인 (HTTP에서는 navigator.mediaDevices가 undefined일 수 있음)
@@ -200,63 +202,75 @@ export default function ClosetPage() {
     capturePhoto();
   };
 
-  // 실제 캡처 로직 (화면에 보이는 비율대로 크롭)
+  // 실제 캡처 로직 (화면에 보이는 영역과 1:1 매칭되도록 정밀 크롭)
   const capturePhoto = () => {
-    if (!videoRef.current) return;
+    if (!videoRef.current || !containerRef.current) return;
 
     const video = videoRef.current;
+    const container = containerRef.current;
 
-    // 1. 비디오 원본 해상도
+    // 1. 비디오 원본 해상도 Check
     const vWidth = video.videoWidth;
     const vHeight = video.videoHeight;
 
-    // 2. 화면에 보이는 요소 크기 (object-cover로 잘려 보이는 영역을 계산하기 위함)
-    const elWidth = video.offsetWidth;
-    const elHeight = video.offsetHeight;
+    if (!vWidth || !vHeight) {
+      console.error("비디오 메타데이터가 아직 로드되지 않았습니다.");
+      return;
+    }
 
-    // 3. 비율 계산
+    // 2. 실제 화면에 보이는 컨테이너 크기 (테두리 제외 등 정밀 측정)
+    const containerRect = container.getBoundingClientRect();
+    const cWidth = containerRect.width;
+    const cHeight = containerRect.height;
+
+    // 3. 비율 계산 (소수점 정밀도 유지)
     const videoAspect = vWidth / vHeight;
-    const elementAspect = elWidth / elHeight;
+    const containerAspect = cWidth / cHeight;
 
     let sx = 0, sy = 0, sWidth = vWidth, sHeight = vHeight;
 
-    if (videoAspect > elementAspect) {
-      // 비디오가 더 와이드함 -> 좌우를 잘라내야 함
-      sWidth = vHeight * elementAspect;
+    if (videoAspect > containerAspect) {
+      // 비디오가 컨테이너보다 더 와이드함 -> 좌우를 잘라내야 함
+      // videoHeight는 꽉 채우고, videoWidth 중 일부만 사용
+      sWidth = vHeight * containerAspect;
       sx = (vWidth - sWidth) / 2;
-    } else if (videoAspect < elementAspect) {
-      // 비디오가 더 홀쭉함 -> 위아래를 잘라내야 함
-      sHeight = vWidth / elementAspect;
+    } else if (videoAspect < containerAspect) {
+      // 비디오가 컨테이너보다 더 길쭉함 (또는 모바일 세로) -> 위아래를 잘라내야 함
+      // videoWidth는 꽉 채우고, videoHeight 중 일부만 사용
+      sHeight = vWidth / containerAspect;
       sy = (vHeight - sHeight) / 2;
     }
-    // 비율이 같으면 그대로 사용
 
+    // 4. 캔버스 생성 (잘라낼 영역의 원본 해상도 크기 사용)
     const canvas = document.createElement("canvas");
-    // 캔버스 크기는 잘라낸 원본 해상도 크기로 설정 (화질 저하 방지)
-    canvas.width = sWidth;
-    canvas.height = sHeight;
+    canvas.width = Math.floor(sWidth);
+    canvas.height = Math.floor(sHeight);
 
     const ctx = canvas.getContext("2d");
 
     if (ctx) {
+      // 배경을 검은색으로 채우기 (투명 픽셀 방지)
+      ctx.fillStyle = "#000000";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
       // 거울 모드 (좌우 반전) 유지
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
 
-      // 크롭하여 그리기
-      // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
-      ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
+      // 정밀 크롭하여 그리기
+      ctx.drawImage(
+        video,
+        sx, sy, sWidth, sHeight,  // 소스 영역 (실수 좌표 허용)
+        0, 0, canvas.width, canvas.height // 타겟 영역
+      );
 
       canvas.toBlob(async (blob) => {
         if (!blob) return;
 
-        // File 객체로 변환
         const file = new File([blob], "camera_capture.jpg", { type: "image/jpeg" });
 
-        // 업로드 진행 (비동기 처리)
         try {
-          console.log("📸 카메라 캡처 업로드 시작 (Cropped)");
-
+          console.log("📸 카메라 캡처 업로드 시작 (Precision Crop)");
           stopCamera();
 
           const response = await uploadProfilePhoto(file);
@@ -757,7 +771,8 @@ export default function ClosetPage() {
                 // 업로드 영역
                 isCameraOpen ? (
                   // 향상된 카메라 뷰 UI
-                  <div className="h-full bg-gray-900 relative flex flex-col items-center justify-center overflow-hidden rounded-2xl">
+                  // 향상된 카메라 뷰 UI
+                  <div ref={containerRef} className="h-full bg-gray-900 relative flex flex-col items-center justify-center overflow-hidden rounded-2xl">
                     {/* 비디오 스트림 */}
                     <video
                       ref={videoRef}
