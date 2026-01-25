@@ -200,22 +200,52 @@ export default function ClosetPage() {
     capturePhoto();
   };
 
-  // 실제 캡처 로직 (기존 capturePhoto 재활용하되, 내부 로직만 분리)
+  // 실제 캡처 로직 (화면에 보이는 비율대로 크롭)
   const capturePhoto = () => {
     if (!videoRef.current) return;
 
+    const video = videoRef.current;
+
+    // 1. 비디오 원본 해상도
+    const vWidth = video.videoWidth;
+    const vHeight = video.videoHeight;
+
+    // 2. 화면에 보이는 요소 크기 (object-cover로 잘려 보이는 영역을 계산하기 위함)
+    const elWidth = video.offsetWidth;
+    const elHeight = video.offsetHeight;
+
+    // 3. 비율 계산
+    const videoAspect = vWidth / vHeight;
+    const elementAspect = elWidth / elHeight;
+
+    let sx = 0, sy = 0, sWidth = vWidth, sHeight = vHeight;
+
+    if (videoAspect > elementAspect) {
+      // 비디오가 더 와이드함 -> 좌우를 잘라내야 함
+      sWidth = vHeight * elementAspect;
+      sx = (vWidth - sWidth) / 2;
+    } else if (videoAspect < elementAspect) {
+      // 비디오가 더 홀쭉함 -> 위아래를 잘라내야 함
+      sHeight = vWidth / elementAspect;
+      sy = (vHeight - sHeight) / 2;
+    }
+    // 비율이 같으면 그대로 사용
+
     const canvas = document.createElement("canvas");
-    canvas.width = videoRef.current.videoWidth;
-    canvas.height = videoRef.current.videoHeight;
+    // 캔버스 크기는 잘라낸 원본 해상도 크기로 설정 (화질 저하 방지)
+    canvas.width = sWidth;
+    canvas.height = sHeight;
+
     const ctx = canvas.getContext("2d");
 
     if (ctx) {
-      // 미러링된 화면을 다시 원래대로 뒤집어서 그릴지 여부 결정.
-      // 캔버스에 그릴때도 좌우반전해서 "거울 모드" 그대로 저장할지, 아니면 원본대로 저장할지.
-      // 보통 사용자가 본 화면(거울모드) 그대로 저장되기를 원함.
+      // 거울 모드 (좌우 반전) 유지
       ctx.translate(canvas.width, 0);
       ctx.scale(-1, 1);
-      ctx.drawImage(videoRef.current, 0, 0);
+
+      // 크롭하여 그리기
+      // drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+      ctx.drawImage(video, sx, sy, sWidth, sHeight, 0, 0, sWidth, sHeight);
 
       canvas.toBlob(async (blob) => {
         if (!blob) return;
@@ -225,15 +255,10 @@ export default function ClosetPage() {
 
         // 업로드 진행 (비동기 처리)
         try {
-          // 비동기 업로드를 위해 즉시 미리보기 처리해주면 더 좋음 (여기선 생략하고 로딩 표시 등은 기존 로직 따름)
-          console.log("📸 카메라 캡처 업로드 시작");
+          console.log("📸 카메라 캡처 업로드 시작 (Cropped)");
 
-          // 카메라 종료는 업로드 성공 후가 아니라 캡처 직후에 닫거나, 
-          // "처리중" 화면을 보여주는 것이 UX상 좋음.
-          // 여기서 우선 카메라를 닫고 "업로드 중/피팅 준비 중" 상태로 넘기는게 자연스러움.
           stopCamera();
 
-          // 임시 로딩 등 필요하다면 추가. 여기서는 기존 uploadProfilePhoto가 완료될 때까지 기다림.
           const response = await uploadProfilePhoto(file);
 
           const fullPhotoUrl = response.data.photoUrl.startsWith("http")
@@ -247,7 +272,6 @@ export default function ClosetPage() {
         } catch (err) {
           const error = err as any;
           alert(error.response?.data?.error?.message || "사진 업로드 실패");
-          // 실패 시 카메라 다시 켜줄지 여부는 선택
         }
       }, "image/jpeg", 0.95);
     }
